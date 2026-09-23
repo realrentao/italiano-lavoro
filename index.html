@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>意语职场通 · Italiano per il Lavoro</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1f2733; --sub:#5b6675;
+    --line:#e6e9ef; --accent:#2563eb; --accent2:#0ea5a4;
+    --ok:#16a34a; --shadow:0 2px 10px rgba(20,30,50,.06);
+    --chip:#eef2f8; --chipOn:#2563eb;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.6; font-size:15px;
+  }
+  a{color:inherit;}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 14px 60px;}
+  header.top{
+    background:linear-gradient(120deg,#1e3a8a,#0ea5a4);
+    color:#fff;padding:22px 14px 18px;position:sticky;top:0;z-index:30;
+    box-shadow:0 2px 12px rgba(20,30,50,.18);
+  }
+  .top .wrap{padding-bottom:0;}
+  .brand{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .brand h1{font-size:20px;margin:0;font-weight:800;letter-spacing:.5px;}
+  .brand .en{font-size:12px;opacity:.85;font-weight:500;}
+  .topbar{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap;}
+  .search{flex:1;min-width:200px;display:flex;background:#fff;border-radius:10px;overflow:hidden;}
+  .search input{border:0;outline:0;flex:1;padding:10px 12px;font-size:15px;color:#1f2733;}
+  .search button{border:0;background:#fff;color:var(--accent);padding:0 14px;font-size:15px;cursor:pointer;}
+  .progmini{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);padding:6px 12px;border-radius:10px;font-size:13px;}
+  .progmini .bar{width:90px;height:8px;background:rgba(255,255,255,.3);border-radius:6px;overflow:hidden;}
+  .progmini .bar i{display:block;height:100%;background:#fde047;width:0;}
+
+  .home-intro{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:16px 0;box-shadow:var(--shadow);font-size:14px;color:var(--sub);}
+  .home-intro b{color:var(--ink);}
+
+  .section-title{font-size:16px;font-weight:800;margin:20px 2px 10px;display:flex;align-items:center;gap:8px;}
+
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px;}
+  .chip{border:1px solid var(--line);background:var(--chip);color:var(--sub);padding:7px 13px;border-radius:20px;font-size:13px;cursor:pointer;user-select:none;transition:.15s;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:8px;}
+  .icard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;box-shadow:var(--shadow);transition:.15s;position:relative;overflow:hidden;}
+  .icard:hover{transform:translateY(-2px);border-color:var(--accent);}
+  .icard .ic{font-size:30px;}
+  .icard .nm{font-weight:800;margin-top:6px;font-size:15px;}
+  .icard .it{font-size:12px;color:var(--sub);}
+  .icard .meta{font-size:11px;color:var(--sub);margin-top:8px;}
+  .icard .pbar{height:6px;background:var(--line);border-radius:4px;margin-top:8px;overflow:hidden;}
+  .icard .pbar i{display:block;height:100%;background:var(--ok);width:0;}
+
+  .back{display:inline-flex;align-items:center;gap:6px;color:var(--accent);cursor:pointer;font-weight:700;margin:14px 2px 0;font-size:14px;}
+  .ind-head{display:flex;align-items:center;gap:12px;margin:14px 0 4px;flex-wrap:wrap;}
+  .ind-head .ic{font-size:34px;}
+  .ind-head h2{margin:0;font-size:20px;}
+  .ind-head .it{color:var(--sub);font-size:13px;}
+
+  .tabs{display:flex;gap:6px;overflow-x:auto;margin:12px 0 6px;border-bottom:1px solid var(--line);padding-bottom:0;}
+  .tab{border:0;background:none;padding:10px 14px;font-size:14px;color:var(--sub);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;font-weight:700;}
+  .tab.on{color:var(--accent);border-bottom-color:var(--accent);}
+
+  .block{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 4px;margin-top:10px;box-shadow:var(--shadow);}
+  .row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+  .row:last-child{border-bottom:0;}
+  .row .main{flex:1;min-width:180px;}
+  .row .it{font-weight:800;font-size:15.5px;}
+  .row .rom{color:var(--accent2);font-size:13px;margin-top:1px;}
+  .row .cn{color:var(--sub);font-size:13.5px;margin-top:1px;}
+  .row.culture{display:block;}
+  .row.culture .ct{font-size:14px;color:var(--ink);}
+  .row.culture .ct b{color:var(--accent);}
+  .au{border:1px solid var(--line);background:#f3f6fb;color:#1e3a8a;border-radius:8px;width:34px;height:34px;font-size:15px;cursor:pointer;flex:none;display:inline-flex;align-items:center;justify-content:center;}
+  .au:active{transform:scale(.92);}
+  .au.cn{color:#b91c1c;background:#fdf2f2;}
+  .au.busy{opacity:.5;}
+  .mark{border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:8px;padding:0 9px;height:34px;font-size:12px;cursor:pointer;flex:none;white-space:nowrap;}
+  .mark.on{background:var(--ok);color:#fff;border-color:var(--ok);}
+  .role{font-size:11px;color:#fff;background:var(--accent);padding:1px 8px;border-radius:10px;display:inline-block;margin-bottom:3px;}
+
+  .res-group{margin-top:14px;}
+  .res-group h3{font-size:14px;margin:6px 2px;color:var(--accent);}
+
+  .note{font-size:12px;color:var(--sub);margin:14px 2px;line-height:1.7;}
+  .empty{text-align:center;color:var(--sub);padding:40px 10px;}
+
+  .dash{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:10px;}
+  .dcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);}
+  .dcard .nm{font-weight:800;}
+  .dcard .dbar{height:9px;background:var(--line);border-radius:6px;margin:8px 0 4px;overflow:hidden;}
+  .dcard .dbar i{display:block;height:100%;background:var(--ok);}
+  .dcard .dt{font-size:12px;color:var(--sub);}
+
+  footer{text-align:center;color:var(--sub);font-size:12px;margin-top:26px;line-height:1.8;}
+  .reset{background:none;border:1px solid var(--line);color:var(--sub);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;}
+  @media(max-width:560px){
+    .brand h1{font-size:17px;}
+    .row .main{min-width:140px;}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <span style="font-size:26px">🇮🇹💼</span>
+      <div>
+        <h1>意语职场通</h1>
+        <div class="en">Italiano per il Lavoro · 意大利各行业华人实用意大利语</div>
+      </div>
+    </div>
+    <div class="topbar">
+      <div class="search">
+        <input id="q" placeholder="搜索词汇 / 句型 / 对话…（中意均可）" onkeydown="if(event.key==='Enter')doSearch()">
+        <button onclick="doSearch()">🔍</button>
+      </div>
+      <div class="progmini">
+        <span id="pmTxt">0%</span>
+        <span class="bar"><i id="pmBar"></i></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap" id="app"></div>
+
+<script>
+/* ============ 数据（由 build.py 注入 content.json） ============ */
+const INDUSTRIES = [{"id": "ristorazione", "name": "餐饮", "it": "Ristorazione", "icon": "🍝", "color": "#dc2626", "vocab": [["il cliente", "伊尔 克利恩泰", "顾客"], ["il tavolo", "伊尔 塔沃洛", "桌子/餐桌"], ["il menu", "伊尔 梅努", "菜单"], ["l'ordinazione", "洛尔迪纳齐奥内", "点单/订单"], ["il conto", "伊尔 孔托", "账单"], ["la cucina", "拉 库奇纳", "厨房"], ["il piatto", "伊尔 皮亚托", "盘子/菜"], ["il cameriere", "伊尔 卡梅里耶雷", "男服务员"], ["la cameriera", "拉 卡梅里耶拉", "女服务员"], ["il caffè", "伊尔 卡费", "咖啡"], ["la pizza", "拉 皮扎", "披萨"], ["la pasta", "拉 帕斯塔", "意面"], ["il vino", "伊尔 维诺", "葡萄酒"], ["l'acqua", "拉克夸", "水"], ["il sale", "伊尔 萨莱", "盐"], ["il pepe", "伊尔 佩佩", "胡椒"], ["il pane", "伊尔 帕内", "面包"], ["il piatto del giorno", "伊尔 皮亚托 德尔 焦尔诺", "今日特餐"], ["il tovagliolo", "伊尔 托瓦利奥洛", "餐巾"], ["la mancia", "拉 曼恰", "小费"]], "sentences": [["Mi scusi, il menu per favore.", "米 斯库齐，伊尔 梅努 佩尔 法沃雷", "打扰一下，请给我菜单。"], ["Vorrei un tavolo per quattro.", "沃雷 伊尔 塔沃洛 佩尔 夸特罗", "我想要一个四人桌。"], ["Avete ordinato?", "阿韦泰 奥尔迪纳托", "您点餐了吗？"], ["Il conto, per favore.", "伊尔 孔托 佩尔 法沃雷", "请结账。"], ["Posso pagare con la carta?", "波索 帕加雷 孔 拉 卡尔塔", "可以刷卡吗？"], ["È tutto buonissimo, grazie.", "埃 图托 博尼西莫，格拉齐耶", "一切都很好吃，谢谢。"], ["Accettate carte di credito?", "阿切塔泰 卡尔泰 迪 克雷迪托", "你们收信用卡吗？"]], "dialogues": [{"scene": "接待顾客", "lines": [["Cameriere", "Buongiorno, per due persone?", "您好，两位吗？"], ["Cliente", "Sì, buongiorno. Un tavolo vicino alla finestra, per favore.", "是的，您好。请给我们靠窗的位子。"], ["Cameriere", "Subito. Mi segua.", "马上。请跟我来。"]]}, {"scene": "点餐", "lines": [["Cameriere", "Avete ordinato?", "您点餐了吗？"], ["Cliente", "Sì, due pizza margherita e un'insalata.", "是的，两个玛格丽特披萨和一份沙拉。"], ["Cameriere", "E da bere?", "喝点什么？"], ["Cliente", "Due acqua e una Coca-Cola.", "两瓶水和一杯可乐。"]]}, {"scene": "结账", "lines": [["Cliente", "Il conto, per favore.", "买单，谢谢。"], ["Cameriere", "Subito. Sono 28 euro.", "马上。共 28 欧。"], ["Cliente", "Posso pagare con la carta?", "可以刷卡吗？"], ["Cameriere", "Certo, va bene.", "当然，可以。"]]}], "culture": ["小费不是强制的，但留下零钱或账单的 5–10% 表示满意是很常见的。", "午餐通常 12:30–14:30，晚餐 19:30 以后才开始；华人常习惯早睡，要注意营业时间差异。", "「Coperto」餐位费是合法的（每客 1–3 欧），账单上看到不必惊讶。", "意大利人重视用餐节奏，不要催促客人，保持轻松氛围。", "对顾客用「Buongiorno / Buonasera」和「Lei」（您），「Ciao」只用于朋友之间。"]}, {"id": "tessile", "name": "纺织", "it": "Tessile / Abbigliamento", "icon": "🧵", "color": "#7c3aed", "vocab": [["il tessuto", "伊尔 泰苏托", "布料"], ["la stoffa", "拉 斯托法", "织物"], ["la macchina da cucire", "拉 马基纳 达 库奇雷", "缝纫机"], ["il filo", "伊尔 菲洛", "线"], ["l'ago", "拉戈", "针"], ["la camicia", "拉 卡米恰", "衬衫"], ["i pantaloni", "伊 潘塔洛尼", "裤子"], ["la giacca", "拉 贾卡", "外套/夹克"], ["la taglia", "拉 塔利亚", "尺码"], ["la misura", "拉 米苏拉", "尺寸"], ["il campione", "伊尔 坎皮奥内", "样衣/样品"], ["la consegna", "拉 孔塞尼亚", "交货"], ["l'ordine", "洛尔迪内", "订单"], ["il magazzino", "伊尔 马加齐诺", "仓库"], ["la fabbrica", "拉 法布里卡", "工厂"], ["il cotone", "伊尔 科托内", "棉"], ["la lana", "拉 拉纳", "羊毛"], ["la seta", "拉 塞塔", "丝绸"], ["il cliente", "伊尔 克利恩泰", "客户"], ["la moda", "拉 莫达", "时尚"]], "sentences": [["Abbiamo bisogno di più tessuto.", "阿比亚莫 比佐尼奥 迪 普 泰苏托", "我们需要更多布料。"], ["La taglia non è giusta.", "拉 塔利亚 农 埃 朱斯塔", "尺码不对。"], ["Quando possiamo ricevere la merce?", "宽多 波西亚莫 里切韦雷 拉 梅尔切", "我们什么时候能收到货？"], ["Il prezzo è troppo alto.", "伊尔 普雷佐 埃 特罗波 阿尔托", "价格太高了。"], ["Possiamo fare uno sconto?", "波西亚莫 法雷 乌诺 斯孔托", "我们能打个折吗？"], ["Il campione è pronto.", "伊尔 坎皮奥内 埃 普龙托", "样衣做好了。"]], "dialogues": [{"scene": "确认样衣", "lines": [["A", "Il campione è pronto?", "样衣做好了吗？"], ["B", "Sì, è nella scatola.", "是的，在盒子里。"], ["A", "La taglia è corretta?", "尺码对吗？"], ["B", "Sì, taglia M come richiesto.", "对，按要求的 M 码。"]]}, {"scene": "交货时间", "lines": [["A", "Quando è la consegna?", "什么时候交货？"], ["B", "Entro venerdì.", "周五之前。"], ["A", "Perfetto, grazie.", "太好了，谢谢。"]]}], "culture": ["意大利纺织业集中在普拉托（Prato），有大型华人社区，日常沟通多用简单意语+手势。", "交货期（consegna）非常严格，迟到可能直接丢单，务必在邮件/合同写清。", "尺码用 S/M/L 或数字（38–48 女装、46–58 男装），确认时务必书面写清楚。", "意方重视样衣质量，第一次合作多确认细节，避免大货不符。", "邮件沟通要正式，开头用「Gentile Signore / Gentile Signora」（尊敬的先生/女士）。"]}, {"id": "edilizia", "name": "建筑", "it": "Edilizia", "icon": "🏗️", "color": "#ea580c", "vocab": [["il cantiere", "伊尔 坎蒂耶雷", "工地"], ["il muratore", "伊尔 穆拉托雷", "泥瓦工"], ["l'elettricista", "莱特里克斯塔", "电工"], ["l'idraulico", "利多劳利科", "水管工"], ["il martello", "伊尔 马尔泰洛", "锤子"], ["la scala", "拉 斯卡拉", "梯子"], ["il cemento", "伊尔 切门托", "水泥"], ["il mattone", "伊尔 马托内", "砖"], ["la sicurezza", "拉 西库雷扎", "安全"], ["il casco", "伊尔 卡斯科", "安全帽"], ["i guanti", "伊 关蒂", "手套"], ["il ponteggio", "伊尔 蓬泰焦", "脚手架"], ["il pavimento", "伊尔 帕维门托", "地板"], ["il muro", "伊尔 穆罗", "墙"], ["la pittura", "拉 皮图拉", "油漆"], ["il permesso", "伊尔 佩尔梅索", "许可/证件"], ["il capo", "伊尔 卡波", "工头"], ["la pala", "拉 帕拉", "铲子"]], "sentences": [["Attenzione, pericolo!", "阿滕齐奥内，佩里科洛", "注意，危险！"], ["Mi serve il martello.", "米 塞尔韦 伊尔 马尔泰洛", "我需要锤子。"], ["Dove sono i mattoni?", "多韦 索诺 伊 马托尼", "砖在哪里？"], ["Finiamo alle cinque.", "菲尼亚莫 阿莱 奇恩奎", "我们五点收工。"], ["Posso fare una pausa?", "波索 法雷 乌纳 保萨", "我可以休息一下吗？"], ["Metti il casco, per favore.", "梅蒂 伊尔 卡斯科，佩尔 法沃雷", "请戴上安全帽。"]], "dialogues": [{"scene": "安全提醒", "lines": [["Capo", "Metti il casco, per favore.", "请戴上安全帽。"], ["Operaio", "Sì, subito.", "好的，马上。"], ["Capo", "E i guanti anche.", "还有手套也戴上。"]]}, {"scene": "工作安排", "lines": [["Capo", "Oggi lavoriamo al muro qui.", "今天我们在那边墙上干活。"], ["Operaio", "Va bene, capo.", "好的，工头。"], ["Capo", "Finito questo, andiamo al piano di sopra.", "弄完这个，我们去楼上。"]]}], "culture": ["意大利工地安全管理严格，不戴安全帽（casco）可能被罚款甚至停工。", "工人有固定咖啡休息时间（pausa caffè），尊重节奏，别硬催。", "工资多为周结或半月结，务必保留工时记录与工资单（busta paga）。", "与工头（capo）沟通要简洁明确，多用命令式短句。", "注意居留（permesso di soggiorno）合法，工地常查身份，随身带证件。"]}, {"id": "parrucchiere", "name": "美发", "it": "Parrucchiere / Estetica", "icon": "💇", "color": "#db2777", "vocab": [["il parrucchiere", "伊尔 帕鲁基耶雷", "男理发师"], ["la parrucchiera", "拉 帕鲁基耶拉", "女理发师"], ["il taglio", "伊尔 塔利奥", "剪发"], ["la piega", "拉 皮耶加", "吹造型"], ["il colore", "伊尔 科洛雷", "染发"], ["lo shampoo", "洛 尚普", "洗发"], ["la permanente", "拉 佩尔马嫩泰", "烫发"], ["la frangia", "拉 弗朗贾", "刘海"], ["i capelli", "伊 卡佩利", "头发"], ["la barba", "拉 巴尔巴", "胡须"], ["la cliente", "拉 克利恩泰", "女顾客"], ["lo specchio", "洛 斯佩基奥", "镜子"], ["il phon", "伊尔 丰", "吹风机"], ["la crema", "拉 克雷马", "发乳/霜"], ["corto", "科尔托", "短"], ["lungo", "伦戈", "长"], ["l'appuntamento", "拉普恩塔门托", "预约"]], "sentences": [["Solo un taglio, per favore.", "索洛 伊尔 塔利奥，佩尔 法沃雷", "只要剪发，谢谢。"], ["Non troppo corto.", "农 特罗波 科尔托", "不要太短。"], ["Mi piace così.", "米 皮亚切 科西", "我喜欢这样。"], ["Quanto costa la piega?", "宽托 科斯塔 拉 皮耶加", "吹造型多少钱？"], ["Vorrei cambiare colore.", "沃雷 坎比亚雷 科洛雷", "我想换个颜色。"], ["Va bene, grazie.", "瓦 贝内，格拉齐耶", "好的，谢谢。"]], "dialogues": [{"scene": "咨询发型", "lines": [["Cliente", "Vorrei tagliare i capelli corti.", "我想把头发剪短。"], ["Parrucchiera", "Corti così?", "这么短吗？（比手势）"], ["Cliente", "Sì, un po' più corti dietro.", "是的，后面再短一点。"]]}, {"scene": "染发", "lines": [["Cliente", "Voglio cambiare colore.", "我想换个颜色。"], ["Parrucchiera", "Che colore preferisce?", "您喜欢什么颜色？"], ["Cliente", "Un castano chiaro.", "浅棕色。"]]}], "culture": ["意大利美发店通常需要预约（appuntamento），直接 walk-in 可能等很久。", "小费非强制但可接受，满意可给几欧。", "用「Lei」（您）尊称顾客，显得专业、有礼貌。", "意大利人很在意发型细节，多确认再下剪，避免返工。", "「Solo taglio」指只剪不洗不吹，和全套价格不同，报价要说清。"]}, {"id": "commercio", "name": "批发零售", "it": "Commercio", "icon": "🛒", "color": "#0891b2", "vocab": [["il negozio", "伊尔 内乔乔", "商店"], ["il mercato", "伊尔 梅尔卡托", "市场"], ["il prezzo", "伊尔 普雷佐", "价格"], ["lo sconto", "洛 斯孔托", "折扣"], ["la merce", "拉 梅尔切", "货物"], ["il cliente", "伊尔 克利恩泰", "客户"], ["la fattura", "拉 法图拉", "发票"], ["il pagamento", "伊尔 帕加门托", "付款"], ["la consegna", "拉 孔塞尼亚", "交货"], ["il magazzino", "伊尔 马加齐诺", "仓库"], ["la cassa", "拉 卡萨", "收银台"], ["il cartellino", "伊尔 卡尔泰利诺", "价签"], ["il lotto", "伊尔 洛托", "批量"], ["la vendita", "拉 文迪塔", "销售"], ["l'acquisto", "拉克奎斯托", "采购"], ["il guadagno", "伊尔 瓜达尼奥", "利润"]], "sentences": [["Il prezzo è troppo alto.", "伊尔 普雷佐 埃 特罗波 阿尔托", "价格太高了。"], ["Possiamo fare uno sconto?", "波西亚莫 法雷 乌诺 斯孔托", "能给折扣吗？"], ["Accettate bonifico?", "阿切塔泰 博尼菲科", "你们收银行转账吗？"], ["Quando è pronta la merce?", "宽多 埃 普龙塔 拉 梅尔切", "货什么时候好？"], ["La consegna è gratuita?", "拉 孔塞尼亚 埃 格拉图伊塔", "送货免费吗？"], ["Mi serve la fattura.", "米 塞尔韦 拉 法图拉", "我需要发票。"]], "dialogues": [{"scene": "议价", "lines": [["Cliente", "Quanto costa al chilo?", "每公斤多少钱？"], ["Venditore", "Cinque euro al chilo.", "五欧一公斤。"], ["Cliente", "Se prendo dieci chili, sconto?", "如果我拿十公斤，有折扣吗？"], ["Venditore", "Faccio quattro e mezzo.", "算四欧半。"]]}, {"scene": "开发票", "lines": [["Cliente", "Mi serve la fattura.", "我需要发票。"], ["Venditore", "Con partita IVA?", "要税号吗？"], ["Cliente", "Sì, eccola.", "是的，给您。"]]}], "culture": ["意大利批发集中在批发市场（mercato all'ingrosso），如米兰、普拉托、罗马。", "Partita IVA（税号）是做生意的基础，开发票（fattura）是法律要求。", "议价在批发市场很常见，但零售店价格多固定，别硬砍。", "付款多用 bonifico bancario（银行转账）或 contanti（现金，注意限额）。", "保留所有票据，税务检查严格，账目清晰能避免罚款。"]}, {"id": "magazzino", "name": "物流仓储", "it": "Magazzino / Logistica", "icon": "📦", "color": "#4d7c0f", "vocab": [["il magazzino", "伊尔 马加齐诺", "仓库"], ["il pacco", "伊尔 帕科", "包裹"], ["la scatola", "拉 斯卡通拉", "箱子"], ["il pallet", "伊尔 帕莱特", "托盘"], ["la merce", "拉 梅尔切", "货物"], ["il carrello", "伊尔 卡雷洛", "推车"], ["il muletto", "伊尔 穆莱托", "叉车"], ["la consegna", "拉 孔塞尼亚", "送货"], ["il ritiro", "伊尔 里蒂罗", "取货"], ["lo scaffale", "洛 斯卡法莱", "货架"], ["la busta", "拉 布斯塔", "信封/袋"], ["il codice a barre", "伊尔 科迪切 阿 巴尔雷", "条形码"], ["il peso", "伊尔 佩索", "重量"], ["la spedizione", "拉 斯佩迪齐奥内", "发货"]], "sentences": [["Mi serve il carrello.", "米 塞尔韦 伊尔 卡雷洛", "我需要推车。"], ["Quanti pacchi ci sono?", "宽蒂 帕基 奇 索诺", "有多少个包裹？"], ["Attenzione a non cadere.", "阿滕齐奥内 阿 农 卡德雷", "小心别掉下来。"], ["La merce è fragile.", "拉 梅尔切 埃 弗里吉莱", "货物易碎。"], ["Firmi qui, per favore.", "菲尔米 奎，佩尔 法沃雷", "请在这里签字。"], ["Carica sul furgone.", "卡里卡 苏尔 富尔戈内", "装到货车上。"]], "dialogues": [{"scene": "取货上架", "lines": [["A", "Dove mettiamo i pacchi?", "包裹放哪里？"], ["B", "Sulla scaffalatura, lì.", "放那边货架上。"], ["A", "Questi sono per la consegna di oggi?", "这些是今天要送的吗？"], ["B", "Sì, caricali sul furgone.", "对，装到货车上。"]]}, {"scene": "收货签字", "lines": [["Corriere", "Firma qui, per favore.", "请在这里签字。"], ["Magazziniere", "Quanti colli sono?", "一共多少件？"], ["Corriere", "Cinque pacchi.", "五个包裹。"]]}], "culture": ["仓库工作节奏快，注意安全，重物用 muletto（叉车）别硬扛。", "意大利物流多用 corriere（快递公司）如 Bartolini、GLS、SDA。", "签字（firma）确认收货是惯例，务必核对数量和外观。", "条形码（codice a barre）扫描入库出库，熟悉手持设备操作。", "班次多为早班，周末可能轮休，排班提前看好。"]}, {"id": "pulizie", "name": "家政清洁", "it": "Pulizie / Colf", "icon": "🧹", "color": "#0d9488", "vocab": [["la casa", "拉 卡萨", "家/房子"], ["la stanza", "拉 斯坦扎", "房间"], ["la cucina", "拉 库奇纳", "厨房"], ["il bagno", "伊尔 巴尼奥", "浴室"], ["la camera", "拉 卡梅拉", "卧室"], ["le pulizie", "莱 普利齐耶", "清洁"], ["l'aspirapolvere", "拉斯皮拉波尔韦雷", "吸尘器"], ["lo straccio", "洛 斯特拉乔", "抹布"], ["il detersivo", "伊尔 德泰尔西沃", "洗涤剂"], ["lo spazzolone", "洛 斯帕佐洛内", "拖把"], ["il pavimento", "伊尔 帕维门托", "地板"], ["la finestra", "拉 菲内斯特拉", "窗户"], ["la spazzatura", "拉 斯帕扎图拉", "垃圾"], ["il sacchetto", "伊尔 萨克托", "垃圾袋"], ["la scopa", "拉 斯科帕", "扫帚"], ["la lavatrice", "拉 拉瓦特里切", "洗衣机"], ["la ferro da stiro", "拉 费罗 达 斯蒂罗", "熨斗"], ["stirare", "斯蒂拉雷", "熨（衣服）"], ["la biancheria", "拉 比安凯里亚", "衣物/床单"], ["il cane", "伊尔 卡内", "狗"]], "sentences": [["Devo pulire la cucina.", "德沃 普利雷 拉 库奇纳", "我要打扫厨房。"], ["Passi l'aspirapolvere, per favore.", "帕西 拉斯皮拉波尔韦雷，佩尔 法沃雷", "请用吸尘器吸一下。"], ["Dove metto la spazzatura?", "多韦 梅托 拉 斯帕扎图拉", "垃圾放哪里？"], ["Ho finito le pulizie.", "奥 菲尼托 莱 普利齐耶", "我做完清洁了。"], ["La biancheria va lavata.", "拉 比安凯里亚 瓦 拉瓦塔", "衣物要洗了。"], ["A che ora serve la colazione?", "阿 凯 奥拉 塞尔韦 拉 科拉齐奥内", "几点需要准备早餐？"]], "dialogues": [{"scene": "每日安排", "lines": [["Padrona", "Oggi pulisca la camera e il bagno.", "今天请打扫卧室和浴室。"], ["Colf", "Va bene. E la cucina?", "好的。厨房呢？"], ["Padrona", "Sì, anche la cucina, per favore.", "对，厨房也请打扫。"]]}, {"scene": "洗衣熨衣", "lines": [["Padrona", "Questa camicia va stirata.", "这件衬衫要熨。"], ["Colf", "Subito, signora.", "马上，女士。"], ["Padrona", "Grazie mille.", "非常感谢。"]]}], "culture": ["家政工作（colf/badante）多通过中介（agenzia）或熟人介绍，务必签正规合同、有工资单（busta paga），避免黑工风险。", "称呼雇主用「Lei」（您），尊重家庭隐私，不打听私事。", "工作分住家（convivente）与白天计时（a ore）两种，工时和薪资合同写清。", "意大利垃圾严格分类：umido（厨余）、secco（干）、differenziata（可回收），务必分对。", "意大利家庭多养宠物，与狗/猫相处要小心，别随意喂食或放养。"]}, {"id": "fabbrica", "name": "工厂制造", "it": "Fabbrica / Produzione", "icon": "🏭", "color": "#475569", "vocab": [["la fabbrica", "拉 法布里卡", "工厂"], ["la catena di montaggio", "拉 卡泰纳 迪 蒙塔焦", "流水线"], ["l'operaio", "洛佩拉约", "工人"], ["il turno", "伊尔 图尔诺", "班次"], ["la macchina", "拉 马基纳", "机器"], ["il pezzo", "伊尔 佩佐", "零件/件"], ["il controllo qualità", "伊尔 孔特罗洛 夸利塔", "质检"], ["la sicurezza", "拉 西库雷扎", "安全"], ["gli occhiali di sicurezza", "利 奥基亚利 迪 西库雷扎", "护目镜"], ["il guanto", "伊尔 关托", "手套"], ["la tuta", "拉 图塔", "工装"], ["la pausa", "拉 保萨", "休息"], ["il capo", "伊尔 卡波", "主管"], ["la scheda", "拉 斯凯达", "工单"], ["il magazzino", "伊尔 马加齐诺", "仓库"], ["spedire", "斯佩迪雷", "发货"], ["produrre", "普罗杜雷", "生产"], ["controllare", "孔特拉雷", "检查"]], "sentences": [["Inizio il turno alle sei.", "因齐奥 伊尔 图尔诺 阿莱 塞", "我六点上班。"], ["Devo controllare i pezzi.", "德沃 孔特拉雷 伊 佩齐", "我要检查零件。"], ["La macchina è rotta.", "拉 马基纳 埃 罗塔", "机器坏了。"], ["Metti la tuta e gli occhiali.", "梅蒂 拉 图塔 埃 利 奥基亚利", "穿上工装戴护目镜。"], ["Quante ne abbiamo fatto oggi?", "宽泰 内 阿比亚莫 法托 奥吉", "今天做了多少个？"], ["Posso fare la pausa?", "波索 法雷 拉 保萨", "可以休息吗？"]], "dialogues": [{"scene": "开工与故障", "lines": [["Capo", "Inizia pure alla catena.", "你直接上流水线吧。"], ["Operaio", "Capo, la macchina è rotta.", "工头，机器坏了。"], ["Capo", "Chiamo il tecnico subito.", "我马上叫技术员。"]]}, {"scene": "质检", "lines": [["Capo", "Controlla questi pezzi, per favore.", "请检查这些零件。"], ["Operaio", "Sì, due non vanno bene.", "好，有两个不合格。"], ["Capo", "Metti da parte quelli difettosi.", "把次品挑出来放一边。"]]}], "culture": ["进车间必须穿工装（tuta）和劳保鞋，戴护目镜/手套（DPI 个人防护装备），违者会被责令离岗。", "班次（turno）多为早/晚/夜三班，合同写清班次与加班补偿。", "意大利劳动法严格，加班有加班费，务必保留工时记录。", "发现问题及时报告工头（capo），避免大批量次品造成更大损失。", "工会（sindacato）在工厂影响力大，了解基本权益与请假流程。"]}, {"id": "rider", "name": "外卖快递", "it": "Consegna / Rider", "icon": "🛵", "color": "#d97706", "vocab": [["la consegna", "拉 孔塞尼亚", "配送"], ["il rider", "伊尔 里德", "骑手"], ["il fattorino", "伊尔 法托里诺", "送货员"], ["l'ordine", "洛尔迪内", "订单"], ["l'indirizzo", "林迪里佐", "地址"], ["il cliente", "伊尔 克利恩泰", "顾客"], ["la pizzeria", "拉 皮泽里亚", "披萨店"], ["il ristorante", "伊尔 里斯托兰泰", "餐厅"], ["la borsa", "拉 博尔萨", "保温餐袋"], ["lo scooter", "洛 斯科泰", "摩托车"], ["la bicicletta", "拉 比奇克莱塔", "自行车"], ["il casco", "伊尔 卡斯科", "头盔"], ["il telefono", "伊尔 泰莱福诺", "电话"], ["il citofono", "伊尔 奇托福诺", "对讲门铃"], ["il codice", "伊尔 科迪切", "取餐码"], ["arrivare", "阿里瓦雷", "到达"], ["chiamare", "基亚马雷", "打电话"], ["la mancia", "拉 曼恰", "小费"]], "sentences": [["Ho una consegna per lei.", "奥 乌纳 孔塞尼亚 佩尔 莱", "我有您的配送。"], ["Dove devo firmare?", "多韦 德沃 菲尔马雷", "我在哪里签字？"], ["Il cliente non risponde.", "伊尔 克利恩泰 农 里斯庞德", "顾客不接电话。"], ["A che piano è?", "阿 凯 皮亚诺 埃", "在几楼？"], ["Mi scusi, dove parcheggio?", "米 斯库齐，多韦 帕尔凯焦", "请问我停哪里？"], ["Grazie per la consegna.", "格拉齐耶 佩尔 拉 孔塞尼亚", "谢谢您的配送（小费）。"]], "dialogues": [{"scene": "送达顾客", "lines": [["Rider", "Buongiorno, ho la sua consegna.", "您好，您的餐到了。"], ["Cliente", "Sì, grazie. A che piano?", "好的谢谢。几楼？"], ["Rider", "Terzo piano, citofono Rosso.", "三楼，对讲按 Rosso。"]]}, {"scene": "到店取餐", "lines": [["Rider", "Ordine numero 245, sono il rider.", "245 号订单，我是骑手。"], ["Pizzeria", "Ecco, con il codice.", "给，这是带取餐码的。"], ["Rider", "Grazie, vado subito.", "谢谢，我马上走。"]]}], "culture": ["外卖多通过 App 接单（Just Eat、Glovo、Deliveroo、Uber Eats），熟悉接单、导航与打卡流程。", "意大利门铃（citofono）复杂，按对楼层和姓名，找不到人先打电话。", "小费非强制，满意顾客可能给，但不要主动索要。", "交通安全第一，骑摩托务必戴头盔（casco），意大利摩托车事故率高。", "注意 ZTL 限行区，违规罚款很高；电动车/自行车通常可进入。"]}];
+
+/* ============ 发音：优先 edge-tts 真人 mp3，失败回退 Web Speech ============ */
+let voices=[];
+function loadVoices(){ try{voices=speechSynthesis.getVoices();}catch(e){} }
+if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged=loadVoices; loadVoices(); }
+function fallbackSpeak(text,lang){
+  if(!('speechSynthesis' in window)){ alert('当前浏览器不支持语音播放，请用 Chrome / Edge 手机版'); return; }
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=lang; u.rate=lang==='zh-CN'?1:0.9;
+  const v=voices.find(x=>x.lang===lang)||voices.find(x=>x.lang&&x.lang.startsWith(lang.split('-')[0]));
+  if(v)u.voice=v;
+  speechSynthesis.speak(u);
+}
+function speak(text,lang,audioPath,btn){
+  if(audioPath){
+    const a=new Audio(audioPath);
+    let fell=false;
+    const fb=()=>{ if(!fell){ fell=true; fallbackSpeak(text,lang); } };
+    a.addEventListener('error',fb);
+    const p=a.play();
+    if(p&&p.catch) p.catch(fb);
+    return;
+  }
+  fallbackSpeak(text,lang);
+}
+
+/* ============ 进度存储 ============ */
+const KEY='lavoro_it_progress_v2';
+let prog={};
+try{ prog=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ prog={}; }
+function saveProg(){ try{ localStorage.setItem(KEY,JSON.stringify(prog)); }catch(e){} }
+function isDone(id){ return !!prog[id]; }
+function totalCount(){
+  let n=0;
+  INDUSTRIES.forEach(I=>{
+    n+=I.vocab.length; n+=I.sentences.length;
+    I.dialogues.forEach(d=>n+=d.lines.length);
+  });
+  return n;
+}
+function doneCount(){
+  let n=0;
+  INDUSTRIES.forEach(I=>{
+    I.vocab.forEach((_,i)=>{ if(isDone(I.id+'-v-'+i))n++; });
+    I.sentences.forEach((_,i)=>{ if(isDone(I.id+'-s-'+i))n++; });
+    I.dialogues.forEach((d,di)=>{ d.lines.forEach((_,li)=>{ if(isDone(I.id+'-d-'+di+'-'+li))n++; }); });
+  });
+  return n;
+}
+function indTotal(I){ return I.vocab.length+I.sentences.length+I.dialogues.reduce((a,d)=>a+d.lines.length,0); }
+function indDone(I){
+  let n=0;
+  I.vocab.forEach((_,i)=>{ if(isDone(I.id+'-v-'+i))n++; });
+  I.sentences.forEach((_,i)=>{ if(isDone(I.id+'-s-'+i))n++; });
+  I.dialogues.forEach((d,di)=>{ d.lines.forEach((_,li)=>{ if(isDone(I.id+'-d-'+di+'-'+li))n++; }); });
+  return n;
+}
+
+/* ============ 工具 ============ */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function pct(a,b){ return b? Math.round(a/b*100):0; }
+
+/* ============ 渲染 ============ */
+const app=document.getElementById('app');
+let view={type:'home', ind:null, tab:'vocab', q:''};
+
+function renderHeader(){
+  const t=doneCount(), tot=totalCount();
+  document.getElementById('pmTxt').textContent=pct(t,tot)+'%';
+  document.getElementById('pmBar').style.width=pct(t,tot)+'%';
+}
+
+function vocabRow(I,i){
+  const [it,rom,cn]=I.vocab[i]; const id=I.id+'-v-'+i; const on=isDone(id);
+  const ait=`audio/${I.id}/v_${i}_it.mp3`, azh=`audio/${I.id}/v_${i}_zh.mp3`;
+  return `<div class="row">
+    <div class="main">
+      <div class="it">${esc(it)}</div>
+      <div class="rom">${esc(rom)}</div>
+      <div class="cn">${esc(cn)}</div>
+    </div>
+    <button class="au" data-spk="${esc(it)}" data-lang="it-IT" data-audio="${ait}" title="听意大利语">🔊</button>
+    <button class="au cn" data-spk="${esc(cn)}" data-lang="zh-CN" data-audio="${azh}" title="听中文">🀄</button>
+    <button class="mark ${on?'on':''}" data-id="${id}">${on?'✓ 已掌握':'标记掌握'}</button>
+  </div>`;
+}
+function sentRow(I,i){
+  const [it,rom,cn]=I.sentences[i]; const id=I.id+'-s-'+i; const on=isDone(id);
+  const ait=`audio/${I.id}/s_${i}_it.mp3`, azh=`audio/${I.id}/s_${i}_zh.mp3`;
+  return `<div class="row">
+    <div class="main">
+      <div class="it">${esc(it)}</div>
+      <div class="rom">${esc(rom)}</div>
+      <div class="cn">${esc(cn)}</div>
+    </div>
+    <button class="au" data-spk="${esc(it)}" data-lang="it-IT" data-audio="${ait}" title="听意大利语">🔊</button>
+    <button class="au cn" data-spk="${esc(cn)}" data-lang="zh-CN" data-audio="${azh}" title="听中文">🀄</button>
+    <button class="mark ${on?'on':''}" data-id="${id}">${on?'✓ 已掌握':'标记掌握'}</button>
+  </div>`;
+}
+function dialogBlock(I){
+  let h='';
+  I.dialogues.forEach((d,di)=>{
+    h+=`<div style="padding:8px 12px;font-weight:800;color:var(--ink);font-size:14px;">💬 ${esc(d.scene)}</div>`;
+    d.lines.forEach((ln,li)=>{
+      const id=I.id+'-d-'+di+'-'+li; const on=isDone(id);
+      const ait=`audio/${I.id}/d_${di}_${li}_it.mp3`, azh=`audio/${I.id}/d_${di}_${li}_zh.mp3`;
+      h+=`<div class="row">
+        <div class="main">
+          <span class="role">${esc(ln[0])}</span>
+          <div class="it">${esc(ln[1])}</div>
+          <div class="cn">${esc(ln[2])}</div>
+        </div>
+        <button class="au" data-spk="${esc(ln[1])}" data-lang="it-IT" data-audio="${ait}" title="听意大利语">🔊</button>
+        <button class="au cn" data-spk="${esc(ln[2])}" data-lang="zh-CN" data-audio="${azh}" title="听中文">🀄</button>
+        <button class="mark ${on?'on':''}" data-id="${id}">${on?'✓ 已掌握':'标记掌握'}</button>
+      </div>`;
+    });
+  });
+  return h;
+}
+function cultureBlock(I){
+  return I.culture.map(c=>`<div class="row culture"><div class="ct">• ${esc(c)}</div></div>`).join('');
+}
+
+function renderHome(){
+  const names=INDUSTRIES.map(I=>I.name).join(' / ');
+  let cards=INDUSTRIES.map(I=>{
+    const d=indDone(I),t=indTotal(I);
+    return `<div class="icard" onclick="openInd('${I.id}')" style="border-top:3px solid ${I.color}">
+      <div class="ic">${I.icon}</div>
+      <div class="nm">${esc(I.name)}</div>
+      <div class="it">${esc(I.it)}</div>
+      <div class="meta">词汇 ${I.vocab.length} · 对话 ${I.dialogues.length} · 句型 ${I.sentences.length}</div>
+      <div class="pbar"><i style="width:${pct(d,t)}%"></i></div>
+      <div class="meta">已学 ${d}/${t}</div>
+    </div>`;
+  }).join('');
+  app.innerHTML=`
+    <div class="home-intro">
+      <b>意语职场通</b> 专为在意大利工作的华人打造，按行业分类，覆盖 <b>${esc(names)}</b> 共 ${INDUSTRIES.length} 大工作场景。
+      每一条都提供 <b>意大利语 + 中文谐音 + 中文意思</b>，点 🔊 听意语真人发音、点 🀄 听中文真人发音（edge-tts 生成）。点「标记掌握」记录学习进度，进度自动保存在本机。
+    </div>
+    <div class="section-title">📚 选择行业开始学习</div>
+    <div class="grid">${cards}</div>
+    <div class="section-title">📊 我的学习总览</div>
+    <div class="dash" id="dash"></div>
+    <div class="note">
+      提示：①「中文谐音」为近似发音，仅供辅助，准确发音请以 🔊 / 🀄 真人语音为准；②真人语音为站点自带 mp3，
+      首次加载需联网下载，之后浏览器会缓存；离线或个别音频缺失时自动回退浏览器内置语音；③进度保存在当前浏览器本地，换设备不同步。
+    </div>
+    <div style="text-align:center;margin-top:10px;">
+      <button class="reset" onclick="resetProg()">清空学习进度</button>
+    </div>
+    <footer>意语职场通 · Italiano per il Lavoro · 为意大利华人从业者而做 🇮🇹</footer>
+  `;
+  renderDash();
+}
+function renderDash(){
+  const el=document.getElementById('dash'); if(!el)return;
+  el.innerHTML=INDUSTRIES.map(I=>{
+    const d=indDone(I),t=indTotal(I);
+    return `<div class="dcard">
+      <div class="nm">${I.icon} ${esc(I.name)}</div>
+      <div class="dbar"><i style="width:${pct(d,t)}%"></i></div>
+      <div class="dt">${pct(d,t)}% · 已学 ${d}/${t}</div>
+    </div>`;
+  }).join('');
+}
+
+function openInd(id){
+  view.type='ind'; view.ind=id; view.tab='vocab';
+  render();
+}
+function renderInd(){
+  const I=INDUSTRIES.find(x=>x.id===view.ind);
+  const d=indDone(I),t=indTotal(I);
+  const tabs=[['vocab','词汇'],['dialog','对话'],['sent','句型'],['culture','文化']];
+  let body='';
+  if(view.tab==='vocab') body=I.vocab.map((_,i)=>vocabRow(I,i)).join('');
+  else if(view.tab==='sent') body=I.sentences.map((_,i)=>sentRow(I,i)).join('');
+  else if(view.tab==='dialog') body=dialogBlock(I);
+  else body=cultureBlock(I);
+  app.innerHTML=`
+    <div class="back" onclick="goHome()">← 返回行业列表</div>
+    <div class="ind-head">
+      <div class="ic">${I.icon}</div>
+      <div>
+        <h2>${esc(I.name)}</h2>
+        <div class="it">${esc(I.it)} · 已学 ${d}/${t}（${pct(d,t)}%）</div>
+      </div>
+    </div>
+    <div class="tabs">
+      ${tabs.map(t=>`<button class="tab ${view.tab===t[0]?'on':''}" onclick="setTab('${t[0]}')">${t[1]}</button>`).join('')}
+    </div>
+    <div class="block">${body||'<div class="empty">暂无内容</div>'}</div>
+  `;
+}
+function setTab(t){ view.tab=t; renderInd(); }
+function goHome(){ view.type='home'; render(); }
+
+function doSearch(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  if(!q){ goHome(); return; }
+  view.type='search'; view.q=q; renderSearch();
+}
+function renderSearch(){
+  const q=view.q;
+  let groups=[];
+  INDUSTRIES.forEach(I=>{
+    let vh=I.vocab.map((v,i)=>[v,i]).filter(([v])=>[v[0],v[1],v[2]].join(' ').toLowerCase().includes(q))
+      .map(([v,i])=>vocabRow(I,i)).join('');
+    let sh=I.sentences.map((s,i)=>[s,i]).filter(([s])=>[s[0],s[1],s[2]].join(' ').toLowerCase().includes(q))
+      .map(([s,i])=>sentRow(I,i)).join('');
+    let dh='';
+    I.dialogues.forEach((d,di)=>{
+      const lines=d.lines.filter(ln=>[ln[0],ln[1],ln[2]].join(' ').toLowerCase().includes(q));
+      if(d.scene.toLowerCase().includes(q)||lines.length){
+        lines.forEach((ln)=>{
+          const idx=d.lines.indexOf(ln); const id=I.id+'-d-'+di+'-'+idx; const on=isDone(id);
+          const ait=`audio/${I.id}/d_${di}_${idx}_it.mp3`, azh=`audio/${I.id}/d_${di}_${idx}_zh.mp3`;
+          dh+=`<div class="row"><div class="main"><span class="role">${esc(ln[0])}</span>
+            <div class="it">${esc(ln[1])}</div><div class="cn">${esc(ln[2])}</div></div>
+            <button class="au" data-spk="${esc(ln[1])}" data-lang="it-IT" data-audio="${ait}">🔊</button>
+            <button class="au cn" data-spk="${esc(ln[2])}" data-lang="zh-CN" data-audio="${azh}">🀄</button>
+            <button class="mark ${on?'on':''}" data-id="${id}">${on?'✓ 已掌握':'标记掌握'}</button></div>`;
+        });
+      }
+    });
+    let ch=I.culture.filter(c=>c.toLowerCase().includes(q)).map(c=>`<div class="row culture"><div class="ct">• ${esc(c)}</div></div>`).join('');
+    const total=vh+sh+dh+ch;
+    if(total) groups.push(`<div class="res-group"><h3>${I.icon} ${esc(I.name)} · ${esc(I.it)}</h3><div class="block">${total}</div></div>`);
+  });
+  app.innerHTML=`
+    <div class="back" onclick="goHome()">← 返回行业列表</div>
+    <div class="section-title">🔍 搜索「${esc(view.q)}」的结果</div>
+    ${groups.join('')||'<div class="empty">没有找到相关内容，换个词试试。</div>'}
+  `;
+}
+
+function resetProg(){
+  if(confirm('确定清空全部学习进度吗？此操作不可恢复。')){
+    prog={}; saveProg(); render(); renderHeader();
+  }
+}
+
+/* ============ 事件委托 ============ */
+document.addEventListener('click',e=>{
+  const au=e.target.closest('[data-spk]');
+  if(au){ speak(au.dataset.spk, au.dataset.lang, au.dataset.audio, au); return; }
+  const mk=e.target.closest('.mark');
+  if(mk){
+    const id=mk.dataset.id;
+    if(isDone(id)) delete prog[id]; else prog[id]=1;
+    saveProg(); renderHeader();
+    const on=isDone(id);
+    mk.classList.toggle('on',on);
+    if(mk.textContent!=='✓') mk.textContent=on?'✓ 已掌握':'标记掌握';
+    if(view.type==='home') renderDash();
+    if(view.type==='ind'){
+      const I=INDUSTRIES.find(x=>x.id===view.ind); const d=indDone(I),t=indTotal(I);
+      document.querySelector('.ind-head .it').textContent=`${I.it} · 已学 ${d}/${t}（${pct(d,t)}%）`;
+    }
+    return;
+  }
+});
+
+function render(){ renderHeader(); if(view.type==='home')renderHome(); else if(view.type==='ind')renderInd(); else renderSearch(); }
+render();
+</script>
+</body>
+</html>

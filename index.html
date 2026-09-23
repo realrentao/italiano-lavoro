@@ -243,18 +243,19 @@ function dialogBlock(I){
   let h='';
   I.dialogues.forEach((d,di)=>{
     h+=`<div style="padding:8px 12px;font-weight:800;color:var(--ink);font-size:14px;">💬 ${esc(d.scene)}</div>`;
-    d.lines.forEach((ln,li)=>{
+      d.lines.forEach((ln,li)=>{
       const id=I.id+'-d-'+di+'-'+li; const on=isDone(id);
       const ait=`audio/${I.id}/d_${di}_${li}_it.mp3`, azh=`audio/${I.id}/d_${di}_${li}_zh.mp3`;
       h+=`<div class="row">
         <div class="main">
           <span class="role">${esc(ln[0])}</span>
           <div class="it">${esc(ln[1])}</div>
-          <div class="cn">${esc(ln[2])}</div>
-          <div class="py">${esc(ln[3]||'')}</div>
+          <div class="rom">${esc(ln[2]||'')}</div>
+          <div class="cn">${esc(ln[3]||'')}</div>
+          <div class="py">${esc(ln[4]||'')}</div>
         </div>
         <button class="au" data-spk="${esc(ln[1])}" data-lang="it-IT" data-audio="${ait}" title="听意大利语">🔊</button>
-        <button class="au cn" data-spk="${esc(ln[2])}" data-lang="zh-CN" data-audio="${azh}" title="听中文">🀄</button>
+        <button class="au cn" data-spk="${esc(ln[3])}" data-lang="zh-CN" data-audio="${azh}" title="听中文">🀄</button>
         <button class="mark ${on?'on':''}" data-id="${id}">${on?'✓ 已掌握':'标记掌握'}</button>
       </div>`;
     });
@@ -359,15 +360,15 @@ function renderSearch(){
       .map(([s,i])=>sentRow(I,i)).join('');
     let dh='';
     I.dialogues.forEach((d,di)=>{
-      const lines=d.lines.filter(ln=>[ln[0],ln[1],ln[2]].join(' ').toLowerCase().includes(q));
+      const lines=d.lines.filter(ln=>[ln[0],ln[1],ln[3]].join(' ').toLowerCase().includes(q));
       if(d.scene.toLowerCase().includes(q)||lines.length){
         lines.forEach((ln)=>{
           const idx=d.lines.indexOf(ln); const id=I.id+'-d-'+di+'-'+idx; const on=isDone(id);
           const ait=`audio/${I.id}/d_${di}_${idx}_it.mp3`, azh=`audio/${I.id}/d_${di}_${idx}_zh.mp3`;
           dh+=`<div class="row"><div class="main"><span class="role">${esc(ln[0])}</span>
-            <div class="it">${esc(ln[1])}</div><div class="cn">${esc(ln[2])}</div></div>
+            <div class="it">${esc(ln[1])}</div><div class="rom">${esc(ln[2]||'')}</div><div class="cn">${esc(ln[3]||'')}</div></div>
             <button class="au" data-spk="${esc(ln[1])}" data-lang="it-IT" data-audio="${ait}">🔊</button>
-            <button class="au cn" data-spk="${esc(ln[2])}" data-lang="zh-CN" data-audio="${azh}">🀄</button>
+            <button class="au cn" data-spk="${esc(ln[3])}" data-lang="zh-CN" data-audio="${azh}">🀄</button>
             <button class="mark ${on?'on':''}" data-id="${id}">${on?'✓ 已掌握':'标记掌握'}</button></div>`;
         });
       }

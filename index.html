@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>意语职场通 · Italiano per il Lavoro</title>
-<script defer src="data/meta.js"></script>
+<script>window.META = [{"id": "parrucchiere", "name": "美发", "it": "Parrucchiere / Estetica", "icon": "💇", "color": "#db2777", "vn": 360, "sn": 253, "dn": 165, "cn": 63, "ds": 19}, {"id": "unghie", "name": "美甲", "it": "Nail art / Manicure", "icon": "💅", "color": "#db2777", "vn": 70, "sn": 39, "dn": 38, "cn": 13, "ds": 5}, {"id": "makeup", "name": "美妆", "it": "Trucco / Make-up", "icon": "💄", "color": "#c026d3", "vn": 69, "sn": 37, "dn": 34, "cn": 13, "ds": 5}, {"id": "ristorazione", "name": "餐饮", "it": "Ristorazione", "icon": "🍝", "color": "#dc2626", "vn": 101, "sn": 60, "dn": 39, "cn": 19, "ds": 7}, {"id": "tessile", "name": "纺织", "it": "Tessile / Abbigliamento", "icon": "🧵", "color": "#7c3aed", "vn": 81, "sn": 46, "dn": 32, "cn": 18, "ds": 5}, {"id": "edilizia", "name": "建筑", "it": "Edilizia", "icon": "🏗️", "color": "#ea580c", "vn": 83, "sn": 48, "dn": 32, "cn": 19, "ds": 6}, {"id": "commercio", "name": "批发零售", "it": "Commercio", "icon": "🛒", "color": "#0891b2", "vn": 69, "sn": 47, "dn": 31, "cn": 19, "ds": 5}, {"id": "magazzino", "name": "物流仓储", "it": "Magazzino / Logistica", "icon": "📦", "color": "#4d7c0f", "vn": 67, "sn": 48, "dn": 31, "cn": 18, "ds": 5}, {"id": "pulizie", "name": "家政清洁", "it": "Pulizie / Colf", "icon": "🧹", "color": "#0d9488", "vn": 74, "sn": 49, "dn": 30, "cn": 19, "ds": 5}, {"id": "fabbrica", "name": "工厂制造", "it": "Fabbrica / Produzione", "icon": "🏭", "color": "#475569", "vn": 79, "sn": 49, "dn": 31, "cn": 18, "ds": 5}, {"id": "rider", "name": "外卖快递", "it": "Consegna / Rider", "icon": "🛵", "color": "#d97706", "vn": 72, "sn": 46, "dn": 30, "cn": 18, "ds": 5}];</script>
 <style>
   :root{
     --bg:#f6f7f9; --card:#ffffff; --ink:#1f2733; --sub:#5b6675;
@@ -131,7 +131,9 @@
 
 <script>
 /* ============ 数据：meta.js（极轻，秒开）+ data/<行业>.js（按需懒加载） ============ */
-const META = window.META || [];
+/* 注意：meta.js 用 defer 加载，会在 DOMContentLoaded 之前才执行；
+   因此这里不能 const 捕获，必须在 boot() 里重新读取 window.META，否则会拿到空数组导致首页不渲染。 */
+let META = window.META || [];
 const DATA = window.DATA = window.DATA || {};
 
 function loadInd(id, cb){
@@ -408,7 +410,8 @@ function dlgRow(I,di,li,ln){
     '<span class="role">'+esc(ln[0])+'</span>'+
     '<div class="it">'+esc(ln[1])+'</div>'+
     '<div class="rom">'+esc(ln[2]||'')+'</div>'+
-    '<div class="cn">'+esc(ln[3]||'')+'</div></div>'+
+    '<div class="cn">'+esc(ln[3]||'')+'</div>'+
+    '<div class="py">'+esc(ln[4]||'')+'</div></div>'+
     '<button class="au" data-spk="'+esc(ln[1])+'" data-lang="it-IT" data-audio="'+ait+'">🔊</button>'+
     '<button class="au cn" data-spk="'+esc(ln[3])+'" data-lang="zh-CN" data-audio="'+azh+'">🀄</button>'+
     '<button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button></div>';
@@ -444,6 +447,7 @@ document.addEventListener('click',function(e){
 
 function render(){ renderHeader(); if(view.type==='home')renderHome(); else if(view.type==='ind')renderInd(); else renderSearch(); }
 function boot(){
+  META = window.META || META;   // 重新读取（defer 的 meta.js 此时已执行）
   if(META.length) render();
   else document.getElementById('app').innerHTML='<div class="empty">⚠️ 数据加载失败，请刷新页面（或检查网络）。</div>';
 }

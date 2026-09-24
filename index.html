@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>意语职场通 · Italiano per il Lavoro</title>
-<script defer src="data.js"></script>
+<script defer src="data/meta.js"></script>
 <style>
   :root{
     --bg:#f6f7f9; --card:#ffffff; --ink:#1f2733; --sub:#5b6675;
@@ -42,9 +42,6 @@
 
   .section-title{font-size:16px;font-weight:800;margin:20px 2px 10px;display:flex;align-items:center;gap:8px;}
 
-  .filters{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px;}
-  .chip{border:1px solid var(--line);background:var(--chip);color:var(--sub);padding:7px 13px;border-radius:20px;font-size:13px;cursor:pointer;user-select:none;transition:.15s;}
-
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:8px;}
   .icard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;box-shadow:var(--shadow);transition:.15s;position:relative;overflow:hidden;}
   .icard:hover{transform:translateY(-2px);border-color:var(--accent);}
@@ -66,6 +63,8 @@
   .tab.on{color:var(--accent);border-bottom-color:var(--accent);}
 
   .block{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 4px;margin-top:10px;box-shadow:var(--shadow);}
+  .grp{background:#eef2f8;color:#1e3a8a;font-weight:800;font-size:13px;padding:8px 12px;border-bottom:1px solid var(--line);border-top:1px solid var(--line);letter-spacing:.3px;}
+  .grp:first-child{border-top:0;}
   .row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
   .row:last-child{border-bottom:0;}
   .row .main{flex:1;min-width:180px;}
@@ -73,15 +72,12 @@
   .row .rom{color:var(--accent2);font-size:13px;margin-top:1px;}
   .row .cn{color:var(--sub);font-size:13.5px;margin-top:1px;}
   .row .py{color:#94a3b8;font-size:12px;margin-top:2px;letter-spacing:.3px;}
-  .row .cpy{color:#94a3b8;font-size:11.5px;margin-top:3px;line-height:1.7;}
-  .culture .cpy{white-space:normal;word-break:break-word;}
   .row.culture{display:block;}
   .row.culture .ct{font-size:14px;color:var(--ink);}
   .row.culture .ct b{color:var(--accent);}
   .au{border:1px solid var(--line);background:#f3f6fb;color:#1e3a8a;border-radius:8px;width:34px;height:34px;font-size:15px;cursor:pointer;flex:none;display:inline-flex;align-items:center;justify-content:center;}
   .au:active{transform:scale(.92);}
   .au.cn{color:#b91c1c;background:#fdf2f2;}
-  .au.busy{opacity:.5;}
   .mark{border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:8px;padding:0 9px;height:34px;font-size:12px;cursor:pointer;flex:none;white-space:nowrap;}
   .mark.on{background:var(--ok);color:#fff;border-color:var(--ok);}
   .role{font-size:11px;color:#fff;background:var(--accent);padding:1px 8px;border-radius:10px;display:inline-block;margin-bottom:3px;}
@@ -134,15 +130,33 @@
 <div class="wrap" id="app"><div class="empty">⏳ 加载中…</div></div>
 
 <script>
-/* ============ 数据：由 build.py 写入外部 data.js（defer 加载，页面秒开） ============ */
-/* window.INDUSTRIES 由 data.js 在 DOMContentLoaded 前注入 */
+/* ============ 数据：meta.js（极轻，秒开）+ data/<行业>.js（按需懒加载） ============ */
+const META = window.META || [];
+const DATA = window.DATA = window.DATA || {};
 
-/* ============ 发音：优先 edge-tts 真人 mp3，失败回退 Web Speech ============ */
+function loadInd(id, cb){
+  if(DATA[id]) return cb(DATA[id]);
+  const s=document.createElement('script');
+  s.src='data/'+id+'.js';
+  s.onload=function(){ cb(DATA[id]); };
+  s.onerror=function(){
+    document.getElementById('app').innerHTML='<div class="empty">⚠️ 该行业数据加载失败，请检查网络后重试。</div>';
+  };
+  document.head.appendChild(s);
+}
+function loadAll(cb){
+  const pend=META.filter(m=>!DATA[m.id]);
+  if(!pend.length) return cb();
+  let n=pend.length;
+  pend.forEach(function(m){ loadInd(m.id, function(){ if(--n===0) cb(); }); });
+}
+
+/* ============ 发音：优先真人 mp3，失败回退 Web Speech ============ */
 let voices=[];
 function loadVoices(){ try{voices=speechSynthesis.getVoices();}catch(e){} }
 if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged=loadVoices; loadVoices(); }
 function fallbackSpeak(text,lang){
-  if(!('speechSynthesis' in window)){ alert('当前浏览器不支持语音播放，请用 Chrome / Edge 手机版'); return; }
+  if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
   u.lang=lang; u.rate=lang==='zh-CN'?1:0.9;
@@ -150,11 +164,11 @@ function fallbackSpeak(text,lang){
   if(v)u.voice=v;
   speechSynthesis.speak(u);
 }
-function speak(text,lang,audioPath,btn){
+function speak(text,lang,audioPath){
   if(audioPath){
     const a=new Audio(audioPath);
     let fell=false;
-    const fb=()=>{ if(!fell){ fell=true; fallbackSpeak(text,lang); } };
+    const fb=function(){ if(!fell){ fell=true; fallbackSpeak(text,lang); } };
     a.addEventListener('error',fb);
     const p=a.play();
     if(p&&p.catch) p.catch(fb);
@@ -164,36 +178,16 @@ function speak(text,lang,audioPath,btn){
 }
 
 /* ============ 进度存储 ============ */
-const KEY='lavoro_it_progress_v2';
+const KEY='lavoro_it_progress_v3';
 let prog={};
 try{ prog=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ prog={}; }
 function saveProg(){ try{ localStorage.setItem(KEY,JSON.stringify(prog)); }catch(e){} }
 function isDone(id){ return !!prog[id]; }
-function totalCount(){
-  let n=0;
-  INDUSTRIES.forEach(I=>{
-    n+=I.vocab.length; n+=I.sentences.length;
-    I.dialogues.forEach(d=>n+=d.lines.length);
-  });
-  return n;
-}
-function doneCount(){
-  let n=0;
-  INDUSTRIES.forEach(I=>{
-    I.vocab.forEach((_,i)=>{ if(isDone(I.id+'-v-'+i))n++; });
-    I.sentences.forEach((_,i)=>{ if(isDone(I.id+'-s-'+i))n++; });
-    I.dialogues.forEach((d,di)=>{ d.lines.forEach((_,li)=>{ if(isDone(I.id+'-d-'+di+'-'+li))n++; }); });
-  });
-  return n;
-}
-function indTotal(I){ return I.vocab.length+I.sentences.length+I.dialogues.reduce((a,d)=>a+d.lines.length,0); }
-function indDone(I){
-  let n=0;
-  I.vocab.forEach((_,i)=>{ if(isDone(I.id+'-v-'+i))n++; });
-  I.sentences.forEach((_,i)=>{ if(isDone(I.id+'-s-'+i))n++; });
-  I.dialogues.forEach((d,di)=>{ d.lines.forEach((_,li)=>{ if(isDone(I.id+'-d-'+di+'-'+li))n++; }); });
-  return n;
-}
+function indTotal(m){ return m.vn+m.sn+m.dn; }
+function indDone(m){ let n=0; for(const k in prog){ if(k.indexOf(m.id+'-')===0) n++; } return n; }
+function metaOf(id){ return META.find(x=>x.id===id)||{id:id,vn:0,sn:0,dn:0,cn:0}; }
+function totalCount(){ return META.reduce(function(a,m){ return a+indTotal(m); },0); }
+function doneCount(){ return Object.keys(prog).length; }
 
 /* ============ 工具 ============ */
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -209,138 +203,159 @@ function renderHeader(){
   document.getElementById('pmBar').style.width=pct(t,tot)+'%';
 }
 
+/* vocab: [it, rom, cn, group, py] */
 function vocabRow(I,i){
-  const [it,rom,cn,py]=I.vocab[i]; const id=I.id+'-v-'+i; const on=isDone(id);
-  const ait=`audio/${I.id}/v_${i}_it.mp3`, azh=`audio/${I.id}/v_${i}_zh.mp3`;
-  return `<div class="row">
-    <div class="main">
-      <div class="it">${esc(it)}</div>
-      <div class="rom">${esc(rom)}</div>
-      <div class="cn">${esc(cn)}</div>
-      <div class="py">${esc(py||'')}</div>
-    </div>
-    <button class="au" data-spk="${esc(it)}" data-lang="it-IT" data-audio="${ait}" title="听意大利语">🔊</button>
-    <button class="au cn" data-spk="${esc(cn)}" data-lang="zh-CN" data-audio="${azh}" title="听中文">🀄</button>
-    <button class="mark ${on?'on':''}" data-id="${id}">${on?'✓ 已掌握':'标记掌握'}</button>
-  </div>`;
+  const v=I.vocab[i]; const id=I.id+'-v-'+i; const on=isDone(id);
+  const ait='audio/'+I.id+'/v_'+i+'_it.mp3', azh='audio/'+I.id+'/v_'+i+'_zh.mp3';
+  return '<div class="row">'+
+    '<div class="main">'+
+      '<div class="it">'+esc(v[0])+'</div>'+
+      '<div class="rom">'+esc(v[1]||'')+'</div>'+
+      '<div class="cn">'+esc(v[2]||'')+'</div>'+
+      '<div class="py">'+esc(v[4]||'')+'</div>'+
+    '</div>'+
+    '<button class="au" data-spk="'+esc(v[0])+'" data-lang="it-IT" data-audio="'+ait+'" title="听意大利语">🔊</button>'+
+    '<button class="au cn" data-spk="'+esc(v[2])+'" data-lang="zh-CN" data-audio="'+azh+'" title="听中文">🀄</button>'+
+    '<button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button>'+
+  '</div>';
 }
+function vocabList(I){
+  let h='', last=null;
+  I.vocab.forEach(function(v,i){
+    const g=v[3]||'';
+    if(g!==last){ if(g) h+='<div class="grp">'+esc(g)+'</div>'; last=g; }
+    h+=vocabRow(I,i);
+  });
+  return h;
+}
+/* sentences: [it, rom, cn, group, py] */
 function sentRow(I,i){
-  const [it,rom,cn,py]=I.sentences[i]; const id=I.id+'-s-'+i; const on=isDone(id);
-  const ait=`audio/${I.id}/s_${i}_it.mp3`, azh=`audio/${I.id}/s_${i}_zh.mp3`;
-  return `<div class="row">
-    <div class="main">
-      <div class="it">${esc(it)}</div>
-      <div class="rom">${esc(rom)}</div>
-      <div class="cn">${esc(cn)}</div>
-      <div class="py">${esc(py||'')}</div>
-    </div>
-    <button class="au" data-spk="${esc(it)}" data-lang="it-IT" data-audio="${ait}" title="听意大利语">🔊</button>
-    <button class="au cn" data-spk="${esc(cn)}" data-lang="zh-CN" data-audio="${azh}" title="听中文">🀄</button>
-    <button class="mark ${on?'on':''}" data-id="${id}">${on?'✓ 已掌握':'标记掌握'}</button>
-  </div>`;
+  const s=I.sentences[i]; const id=I.id+'-s-'+i; const on=isDone(id);
+  const ait='audio/'+I.id+'/s_'+i+'_it.mp3', azh='audio/'+I.id+'/s_'+i+'_zh.mp3';
+  return '<div class="row">'+
+    '<div class="main">'+
+      '<div class="it">'+esc(s[0])+'</div>'+
+      '<div class="rom">'+esc(s[1]||'')+'</div>'+
+      '<div class="cn">'+esc(s[2]||'')+'</div>'+
+      '<div class="py">'+esc(s[4]||'')+'</div>'+
+    '</div>'+
+    '<button class="au" data-spk="'+esc(s[0])+'" data-lang="it-IT" data-audio="'+ait+'" title="听意大利语">🔊</button>'+
+    '<button class="au cn" data-spk="'+esc(s[2])+'" data-lang="zh-CN" data-audio="'+azh+'" title="听中文">🀄</button>'+
+    '<button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button>'+
+  '</div>';
 }
+function sentList(I){
+  let h='', last=null;
+  I.sentences.forEach(function(s,i){
+    const g=s[3]||'';
+    if(g!==last){ if(g) h+='<div class="grp">'+esc(g)+'</div>'; last=g; }
+    h+=sentRow(I,i);
+  });
+  return h;
+}
+/* dialogue lines: [role, it, rom, cn, py] */
 function dialogBlock(I){
   let h='';
-  I.dialogues.forEach((d,di)=>{
-    h+=`<div style="padding:8px 12px;font-weight:800;color:var(--ink);font-size:14px;">💬 ${esc(d.scene)}</div>`;
-      d.lines.forEach((ln,li)=>{
+  I.dialogues.forEach(function(d,di){
+    h+='<div class="grp">💬 '+esc(d.scene)+'</div>';
+    d.lines.forEach(function(ln,li){
       const id=I.id+'-d-'+di+'-'+li; const on=isDone(id);
-      const ait=`audio/${I.id}/d_${di}_${li}_it.mp3`, azh=`audio/${I.id}/d_${di}_${li}_zh.mp3`;
-      h+=`<div class="row">
-        <div class="main">
-          <span class="role">${esc(ln[0])}</span>
-          <div class="it">${esc(ln[1])}</div>
-          <div class="rom">${esc(ln[2]||'')}</div>
-          <div class="cn">${esc(ln[3]||'')}</div>
-          <div class="py">${esc(ln[4]||'')}</div>
-        </div>
-        <button class="au" data-spk="${esc(ln[1])}" data-lang="it-IT" data-audio="${ait}" title="听意大利语">🔊</button>
-        <button class="au cn" data-spk="${esc(ln[3])}" data-lang="zh-CN" data-audio="${azh}" title="听中文">🀄</button>
-        <button class="mark ${on?'on':''}" data-id="${id}">${on?'✓ 已掌握':'标记掌握'}</button>
-      </div>`;
+      const ait='audio/'+I.id+'/d_'+di+'_'+li+'_it.mp3', azh='audio/'+I.id+'/d_'+di+'_'+li+'_zh.mp3';
+      h+='<div class="row">'+
+        '<div class="main">'+
+          '<span class="role">'+esc(ln[0])+'</span>'+
+          '<div class="it">'+esc(ln[1])+'</div>'+
+          '<div class="rom">'+esc(ln[2]||'')+'</div>'+
+          '<div class="cn">'+esc(ln[3]||'')+'</div>'+
+          '<div class="py">'+esc(ln[4]||'')+'</div>'+
+        '</div>'+
+        '<button class="au" data-spk="'+esc(ln[1])+'" data-lang="it-IT" data-audio="'+ait+'" title="听意大利语">🔊</button>'+
+        '<button class="au cn" data-spk="'+esc(ln[3])+'" data-lang="zh-CN" data-audio="'+azh+'" title="听中文">🀄</button>'+
+        '<button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button>'+
+      '</div>';
     });
   });
   return h;
 }
+/* culture：纯文本，不加拼音 */
 function cultureBlock(I){
-  return I.culture.map(c=>{
-    const txt=Array.isArray(c)?c[0]:c, p=Array.isArray(c)?c[1]:'';
-    return `<div class="row culture"><div class="ct">• ${esc(txt)}</div>${p?`<div class="cpy">${esc(p)}</div>`:''}</div>`;
+  return I.culture.map(function(c){
+    const txt=Array.isArray(c)?c[0]:c;
+    return '<div class="row culture"><div class="ct">• '+esc(txt)+'</div></div>';
   }).join('');
 }
 
 function renderHome(){
-  const names=INDUSTRIES.map(I=>I.name).join(' / ');
-  let cards=INDUSTRIES.map(I=>{
-    const d=indDone(I),t=indTotal(I);
-    return `<div class="icard" onclick="openInd('${I.id}')" style="border-top:3px solid ${I.color}">
-      <div class="ic">${I.icon}</div>
-      <div class="nm">${esc(I.name)}</div>
-      <div class="it">${esc(I.it)}</div>
-      <div class="meta">词汇 ${I.vocab.length} · 对话 ${I.dialogues.length} · 句型 ${I.sentences.length}</div>
-      <div class="pbar"><i style="width:${pct(d,t)}%"></i></div>
-      <div class="meta">已学 ${d}/${t}</div>
-    </div>`;
+  let cards=META.map(function(m){
+    const d=indDone(m),t=indTotal(m);
+    return '<div class="icard" onclick="openInd(\''+m.id+'\')" style="border-top:3px solid '+m.color+'">'+
+      '<div class="ic">'+m.icon+'</div>'+
+      '<div class="nm">'+esc(m.name)+'</div>'+
+      '<div class="it">'+esc(m.it)+'</div>'+
+      '<div class="meta">词汇 '+m.vn+' · 对话 '+m.ds+' · 句型 '+m.sn+'</div>'+
+      '<div class="pbar"><i style="width:'+pct(d,t)+'%"></i></div>'+
+      '<div class="meta">已学 '+d+'/'+t+'</div>'+
+    '</div>';
   }).join('');
-  app.innerHTML=`
-    <div class="home-intro">
-      <b>意语职场通</b> 专为在意大利工作的华人打造，按行业分类，覆盖 <b>${esc(names)}</b> 共 ${INDUSTRIES.length} 大工作场景。
-      每一条都提供 <b>意大利语 + 中文谐音 + 中文意思（附拼音）</b>，点 🔊 听意语真人发音、点 🀄 听中文真人发音（edge-tts 生成）。点「标记掌握」记录学习进度，进度自动保存在本机。
-    </div>
-    <div class="section-title">📚 选择行业开始学习</div>
-    <div class="grid">${cards}</div>
-    <div class="section-title">📊 我的学习总览</div>
-    <div class="dash" id="dash"></div>
-    <div class="note">
-      提示：①「中文谐音」为近似发音，仅供辅助，准确发音请以 🔊 / 🀄 真人语音为准；②真人语音为站点自带 mp3，
-      首次加载需联网下载，之后浏览器会缓存；离线或个别音频缺失时自动回退浏览器内置语音；③进度保存在当前浏览器本地，换设备不同步。
-    </div>
-    <div style="text-align:center;margin-top:10px;">
-      <button class="reset" onclick="resetProg()">清空学习进度</button>
-    </div>
-    <footer>意语职场通 · Italiano per il Lavoro · 为意大利华人从业者而做 🇮🇹</footer>
-  `;
+  app.innerHTML=
+    '<div class="home-intro">'+
+      '<b>意语职场通</b> 专为在意大利工作的华人打造，按行业分类，覆盖在意华人主要工作场景。'+
+      '每一条都提供 <b>意大利语 + 中文谐音 + 中文意思（附拼音）</b>，点 🔊 听意语真人发音、点 🀄 听中文真人发音。点「标记掌握」记录学习进度，进度自动保存在本机。'+
+    '</div>'+
+    '<div class="section-title">📚 选择行业开始学习</div>'+
+    '<div class="grid">'+cards+'</div>'+
+    '<div class="section-title">📊 我的学习总览</div>'+
+    '<div class="dash" id="dash"></div>'+
+    '<div class="note">'+
+      '提示：①「中文谐音」为近似发音，仅供辅助，准确发音请以 🔊 / 🀄 真人语音为准；②真人语音为站点自带 mp3，'+
+      '首次加载需联网下载，之后浏览器会缓存；离线或个别音频缺失时自动回退浏览器内置语音；③进度保存在当前浏览器本地，换设备不同步。'+
+    '</div>'+
+    '<div style="text-align:center;margin-top:10px;">'+
+      '<button class="reset" onclick="resetProg()">清空学习进度</button>'+
+    '</div>'+
+    '<footer>意语职场通 · Italiano per il Lavoro · 为意大利华人从业者而做 🇮🇹</footer>';
   renderDash();
 }
 function renderDash(){
   const el=document.getElementById('dash'); if(!el)return;
-  el.innerHTML=INDUSTRIES.map(I=>{
-    const d=indDone(I),t=indTotal(I);
-    return `<div class="dcard">
-      <div class="nm">${I.icon} ${esc(I.name)}</div>
-      <div class="dbar"><i style="width:${pct(d,t)}%"></i></div>
-      <div class="dt">${pct(d,t)}% · 已学 ${d}/${t}</div>
-    </div>`;
+  el.innerHTML=META.map(function(m){
+    const d=indDone(m),t=indTotal(m);
+    return '<div class="dcard">'+
+      '<div class="nm">'+m.icon+' '+esc(m.name)+'</div>'+
+      '<div class="dbar"><i style="width:'+pct(d,t)+'%"></i></div>'+
+      '<div class="dt">'+pct(d,t)+'% · 已学 '+d+'/'+t+'</div>'+
+    '</div>';
   }).join('');
 }
 
 function openInd(id){
   view.type='ind'; view.ind=id; view.tab='vocab';
-  render();
+  const I=DATA[id];
+  if(I) return render();
+  app.innerHTML='<div class="empty">⏳ 正在载入「'+esc((metaOf(id).name||id))+'」…</div>';
+  loadInd(id, function(){ render(); });
 }
 function renderInd(){
-  const I=INDUSTRIES.find(x=>x.id===view.ind);
-  const d=indDone(I),t=indTotal(I);
+  const I=DATA[view.ind];
+  if(!I){ app.innerHTML='<div class="empty">⚠️ 数据未加载，请返回重试。</div>'; return; }
+  const m=metaOf(view.ind); const d=indDone(m),t=indTotal(m);
   const tabs=[['vocab','词汇'],['dialog','对话'],['sent','句型'],['culture','文化']];
   let body='';
-  if(view.tab==='vocab') body=I.vocab.map((_,i)=>vocabRow(I,i)).join('');
-  else if(view.tab==='sent') body=I.sentences.map((_,i)=>sentRow(I,i)).join('');
+  if(view.tab==='vocab') body=vocabList(I);
+  else if(view.tab==='sent') body=sentList(I);
   else if(view.tab==='dialog') body=dialogBlock(I);
   else body=cultureBlock(I);
-  app.innerHTML=`
-    <div class="back" onclick="goHome()">← 返回行业列表</div>
-    <div class="ind-head">
-      <div class="ic">${I.icon}</div>
-      <div>
-        <h2>${esc(I.name)}</h2>
-        <div class="it">${esc(I.it)} · 已学 ${d}/${t}（${pct(d,t)}%）</div>
-      </div>
-    </div>
-    <div class="tabs">
-      ${tabs.map(t=>`<button class="tab ${view.tab===t[0]?'on':''}" onclick="setTab('${t[0]}')">${t[1]}</button>`).join('')}
-    </div>
-    <div class="block">${body||'<div class="empty">暂无内容</div>'}</div>
-  `;
+  app.innerHTML=
+    '<div class="back" onclick="goHome()">← 返回行业列表</div>'+
+    '<div class="ind-head">'+
+      '<div class="ic">'+m.icon+'</div>'+
+      '<div><h2>'+esc(m.name)+'</h2>'+
+      '<div class="it">'+esc(m.it)+' · 已学 '+d+'/'+t+'（'+pct(d,t)+'%）</div></div>'+
+    '</div>'+
+    '<div class="tabs">'+
+      tabs.map(function(x){ return '<button class="tab '+(view.tab===x[0]?'on':'')+'" onclick="setTab(\''+x[0]+'\')">'+x[1]+'</button>'; }).join('')+
+    '</div>'+
+    '<div class="block">'+(body||'<div class="empty">暂无内容</div>')+'</div>';
 }
 function setTab(t){ view.tab=t; renderInd(); }
 function goHome(){ view.type='home'; render(); }
@@ -348,43 +363,55 @@ function goHome(){ view.type='home'; render(); }
 function doSearch(){
   const q=document.getElementById('q').value.trim().toLowerCase();
   if(!q){ goHome(); return; }
-  view.type='search'; view.q=q; renderSearch();
+  view.type='search'; view.q=q;
+  app.innerHTML='<div class="empty">⏳ 正在检索全部行业…</div>';
+  loadAll(function(){ renderSearch(); });
 }
 function renderSearch(){
   const q=view.q;
   let groups=[];
-  INDUSTRIES.forEach(I=>{
-    let vh=I.vocab.map((v,i)=>[v,i]).filter(([v])=>[v[0],v[1],v[2]].join(' ').toLowerCase().includes(q))
-      .map(([v,i])=>vocabRow(I,i)).join('');
-    let sh=I.sentences.map((s,i)=>[s,i]).filter(([s])=>[s[0],s[1],s[2]].join(' ').toLowerCase().includes(q))
-      .map(([s,i])=>sentRow(I,i)).join('');
-    let dh='';
-    I.dialogues.forEach((d,di)=>{
-      const lines=d.lines.filter(ln=>[ln[0],ln[1],ln[3]].join(' ').toLowerCase().includes(q));
-      if(d.scene.toLowerCase().includes(q)||lines.length){
-        lines.forEach((ln)=>{
-          const idx=d.lines.indexOf(ln); const id=I.id+'-d-'+di+'-'+idx; const on=isDone(id);
-          const ait=`audio/${I.id}/d_${di}_${idx}_it.mp3`, azh=`audio/${I.id}/d_${di}_${idx}_zh.mp3`;
-          dh+=`<div class="row"><div class="main"><span class="role">${esc(ln[0])}</span>
-            <div class="it">${esc(ln[1])}</div><div class="rom">${esc(ln[2]||'')}</div><div class="cn">${esc(ln[3]||'')}</div></div>
-            <button class="au" data-spk="${esc(ln[1])}" data-lang="it-IT" data-audio="${ait}">🔊</button>
-            <button class="au cn" data-spk="${esc(ln[3])}" data-lang="zh-CN" data-audio="${azh}">🀄</button>
-            <button class="mark ${on?'on':''}" data-id="${id}">${on?'✓ 已掌握':'标记掌握'}</button></div>`;
-        });
-      }
+  META.forEach(function(m){
+    const I=DATA[m.id]; if(!I) return;
+    let vh='';
+    I.vocab.forEach(function(v,i){
+      if((v[0]+' '+(v[1]||'')+' '+(v[2]||'')).toLowerCase().indexOf(q)>=0) vh+=vocabRow(I,i);
     });
-    let ch=I.culture.filter(c=>(Array.isArray(c)?(c[0]+' '+c[1]):c).toLowerCase().includes(q)).map(c=>{
-      const txt=Array.isArray(c)?c[0]:c, p=Array.isArray(c)?c[1]:'';
-      return `<div class="row culture"><div class="ct">• ${esc(txt)}</div>${p?`<div class="cpy">${esc(p)}</div>`:''}</div>`;
-    }).join('');
+    let sh='';
+    I.sentences.forEach(function(s,i){
+      if((s[0]+' '+(s[1]||'')+' '+(s[2]||'')).toLowerCase().indexOf(q)>=0) sh+=sentRow(I,i);
+    });
+    let dh='';
+    I.dialogues.forEach(function(d,di){
+      d.lines.forEach(function(ln,li){
+        if((ln[0]+' '+ln[1]+' '+(ln[3]||'')).toLowerCase().indexOf(q)>=0 || d.scene.toLowerCase().indexOf(q)>=0){
+          dh+=dlgRow(I,di,li,ln);
+        }
+      });
+    });
+    let ch='';
+    I.culture.forEach(function(c){
+      const txt=Array.isArray(c)?c[0]:c;
+      if(String(txt).toLowerCase().indexOf(q)>=0) ch+='<div class="row culture"><div class="ct">• '+esc(txt)+'</div></div>';
+    });
     const total=vh+sh+dh+ch;
-    if(total) groups.push(`<div class="res-group"><h3>${I.icon} ${esc(I.name)} · ${esc(I.it)}</h3><div class="block">${total}</div></div>`);
+    if(total) groups.push('<div class="res-group"><h3>'+m.icon+' '+esc(m.name)+' · '+esc(m.it)+'</h3><div class="block">'+total+'</div></div>');
   });
-  app.innerHTML=`
-    <div class="back" onclick="goHome()">← 返回行业列表</div>
-    <div class="section-title">🔍 搜索「${esc(view.q)}」的结果</div>
-    ${groups.join('')||'<div class="empty">没有找到相关内容，换个词试试。</div>'}
-  `;
+  app.innerHTML=
+    '<div class="back" onclick="goHome()">← 返回行业列表</div>'+
+    '<div class="section-title">🔍 搜索「'+esc(view.q)+'」的结果</div>'+
+    (groups.join('')||'<div class="empty">没有找到相关内容，换个词试试。</div>');
+}
+function dlgRow(I,di,li,ln){
+  const id=I.id+'-d-'+di+'-'+li; const on=isDone(id);
+  const ait='audio/'+I.id+'/d_'+di+'_'+li+'_it.mp3', azh='audio/'+I.id+'/d_'+di+'_'+li+'_zh.mp3';
+  return '<div class="row"><div class="main">'+
+    '<span class="role">'+esc(ln[0])+'</span>'+
+    '<div class="it">'+esc(ln[1])+'</div>'+
+    '<div class="rom">'+esc(ln[2]||'')+'</div>'+
+    '<div class="cn">'+esc(ln[3]||'')+'</div></div>'+
+    '<button class="au" data-spk="'+esc(ln[1])+'" data-lang="it-IT" data-audio="'+ait+'">🔊</button>'+
+    '<button class="au cn" data-spk="'+esc(ln[3])+'" data-lang="zh-CN" data-audio="'+azh+'">🀄</button>'+
+    '<button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button></div>';
 }
 
 function resetProg(){
@@ -394,9 +421,9 @@ function resetProg(){
 }
 
 /* ============ 事件委托 ============ */
-document.addEventListener('click',e=>{
+document.addEventListener('click',function(e){
   const au=e.target.closest('[data-spk]');
-  if(au){ speak(au.dataset.spk, au.dataset.lang, au.dataset.audio, au); return; }
+  if(au){ speak(au.dataset.spk, au.dataset.lang, au.dataset.audio); return; }
   const mk=e.target.closest('.mark');
   if(mk){
     const id=mk.dataset.id;
@@ -404,24 +431,21 @@ document.addEventListener('click',e=>{
     saveProg(); renderHeader();
     const on=isDone(id);
     mk.classList.toggle('on',on);
-    if(mk.textContent!=='✓') mk.textContent=on?'✓ 已掌握':'标记掌握';
+    mk.textContent=on?'✓ 已掌握':'标记掌握';
     if(view.type==='home') renderDash();
     if(view.type==='ind'){
-      const I=INDUSTRIES.find(x=>x.id===view.ind); const d=indDone(I),t=indTotal(I);
-      document.querySelector('.ind-head .it').textContent=`${I.it} · 已学 ${d}/${t}（${pct(d,t)}%）`;
+      const m=metaOf(view.ind);
+      const el=document.querySelector('.ind-head .it');
+      if(el) el.textContent=m.it+' · 已学 '+indDone(m)+'/'+indTotal(m)+'（'+pct(indDone(m),indTotal(m))+'%）';
     }
     return;
   }
 });
 
 function render(){ renderHeader(); if(view.type==='home')renderHome(); else if(view.type==='ind')renderInd(); else renderSearch(); }
-/* data.js 以 defer 加载，DOMContentLoaded 前已就绪；超时兜底避免一直转圈 */
 function boot(){
-  if(window.INDUSTRIES && window.INDUSTRIES.length){
-    render();
-  }else{
-    document.getElementById('app').innerHTML='<div class="empty">⚠️ 数据加载失败，请刷新页面（或检查网络）。</div>';
-  }
+  if(META.length) render();
+  else document.getElementById('app').innerHTML='<div class="empty">⚠️ 数据加载失败，请刷新页面（或检查网络）。</div>';
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot);
 else boot();

@@ -183,17 +183,24 @@ function fallbackSpeak(text,lang){
   speechSynthesis.speak(u);
 }
 let curAudio=null;   // 复用同一个 Audio 元素，避免重复创建与叠音
+function stopAllAudio(){
+  // ① 停止正在播放的真人 mp3
+  if(curAudio){
+    try{ curAudio.pause(); curAudio.currentTime=0; }catch(e){}
+  }
+  // ② 停止浏览器 TTS 回退（与 mp3 互斥，确保新音频播放时旧音频一定静音）
+  try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+}
 function speak(text,lang,audioPath){
+  stopAllAudio();   // 新音频播放前，先打断在播音频（mp3 与 TTS 任一通道）
   if(audioPath){
     if(!curAudio) curAudio=new Audio();
-    curAudio.pause();
-    try{ curAudio.currentTime=0; }catch(e){}
     curAudio.src=audioPath;
     let fell=false;
     const fb=function(){ if(!fell){ fell=true; fallbackSpeak(text,lang); } };
     curAudio.onerror=fb;
     const p=curAudio.play();
-    if(p&&p.catch) p.catch(fb);
+    if(p&&p.catch) p.catch(function(e){ if(e&&e.name==='AbortError') return; fb(); });
     return;
   }
   fallbackSpeak(text,lang);

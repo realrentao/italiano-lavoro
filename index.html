@@ -65,19 +65,21 @@
   .block{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 4px;margin-top:10px;box-shadow:var(--shadow);}
   .grp{background:#eef2f8;color:#1e3a8a;font-weight:800;font-size:13px;padding:8px 12px;border-bottom:1px solid var(--line);border-top:1px solid var(--line);letter-spacing:.3px;}
   .grp:first-child{border-top:0;}
-  .row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+  .row{display:block;padding:11px 12px;border-bottom:1px solid var(--line);}
   .row:last-child{border-bottom:0;}
-  .row .main{flex:1;min-width:180px;}
-  .row .it{font-weight:800;font-size:15.5px;}
+  .rowtop{display:flex;justify-content:flex-end;margin-bottom:3px;}
+  .rowtop .mark{height:26px;font-size:11px;padding:0 10px;}
+  .row .it{font-weight:800;font-size:15.5px;cursor:pointer;}
+  .row .it:active{background:#eef2f8;border-radius:6px;}
+  .row .it::after{content:"🔊";opacity:.28;font-size:11px;margin-left:6px;}
   .row .rom{color:var(--accent2);font-size:13px;margin-top:1px;}
-  .row .cn{color:var(--sub);font-size:13.5px;margin-top:1px;}
+  .row .cn{color:var(--sub);font-size:13.5px;margin-top:1px;cursor:pointer;}
+  .row .cn:active{background:#fdf2f2;border-radius:6px;}
+  .row .cn::after{content:"🀄";opacity:.28;font-size:11px;margin-left:6px;}
   .row .py{color:#94a3b8;font-size:12px;margin-top:2px;letter-spacing:.3px;}
   .row.culture{display:block;}
   .row.culture .ct{font-size:14px;color:var(--ink);}
   .row.culture .ct b{color:var(--accent);}
-  .au{border:1px solid var(--line);background:#f3f6fb;color:#1e3a8a;border-radius:8px;width:34px;height:34px;font-size:15px;cursor:pointer;flex:none;display:inline-flex;align-items:center;justify-content:center;}
-  .au:active{transform:scale(.92);}
-  .au.cn{color:#b91c1c;background:#fdf2f2;}
   .mark{border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:8px;padding:0 9px;height:34px;font-size:12px;cursor:pointer;flex:none;white-space:nowrap;}
   .mark.on{background:var(--ok);color:#fff;border-color:var(--ok);}
   .role{font-size:11px;color:#fff;background:var(--accent);padding:1px 8px;border-radius:10px;display:inline-block;margin-bottom:3px;}
@@ -210,15 +212,11 @@ function vocabRow(I,i){
   const v=I.vocab[i]; const id=I.id+'-v-'+i; const on=isDone(id);
   const ait='audio/'+I.id+'/v_'+i+'_it.mp3', azh='audio/'+I.id+'/v_'+i+'_zh.mp3';
   return '<div class="row">'+
-    '<div class="main">'+
-      '<div class="it">'+esc(v[0])+'</div>'+
-      '<div class="rom">'+esc(v[1]||'')+'</div>'+
-      '<div class="cn">'+esc(v[2]||'')+'</div>'+
-      '<div class="py">'+esc(v[4]||'')+'</div>'+
-    '</div>'+
-    '<button class="au" data-spk="'+esc(v[0])+'" data-lang="it-IT" data-audio="'+ait+'" title="听意大利语">🔊</button>'+
-    '<button class="au cn" data-spk="'+esc(v[2])+'" data-lang="zh-CN" data-audio="'+azh+'" title="听中文">🀄</button>'+
-    '<button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button>'+
+    '<div class="rowtop"><button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button></div>'+
+    '<div class="it" data-spk="'+esc(v[0])+'" data-lang="it-IT" data-audio="'+ait+'" title="点击听意大利语">'+esc(v[0])+'</div>'+
+    '<div class="rom">'+esc(v[1]||'')+'</div>'+
+    '<div class="cn" data-spk="'+esc(v[2])+'" data-lang="zh-CN" data-audio="'+azh+'" title="点击听中文">'+esc(v[2]||'')+'</div>'+
+    '<div class="py">'+esc(v[4]||'')+'</div>'+
   '</div>';
 }
 function vocabList(I){
@@ -235,15 +233,11 @@ function sentRow(I,i){
   const s=I.sentences[i]; const id=I.id+'-s-'+i; const on=isDone(id);
   const ait='audio/'+I.id+'/s_'+i+'_it.mp3', azh='audio/'+I.id+'/s_'+i+'_zh.mp3';
   return '<div class="row">'+
-    '<div class="main">'+
-      '<div class="it">'+esc(s[0])+'</div>'+
-      '<div class="rom">'+esc(s[1]||'')+'</div>'+
-      '<div class="cn">'+esc(s[2]||'')+'</div>'+
-      '<div class="py">'+esc(s[4]||'')+'</div>'+
-    '</div>'+
-    '<button class="au" data-spk="'+esc(s[0])+'" data-lang="it-IT" data-audio="'+ait+'" title="听意大利语">🔊</button>'+
-    '<button class="au cn" data-spk="'+esc(s[2])+'" data-lang="zh-CN" data-audio="'+azh+'" title="听中文">🀄</button>'+
-    '<button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button>'+
+    '<div class="rowtop"><button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button></div>'+
+    '<div class="it" data-spk="'+esc(s[0])+'" data-lang="it-IT" data-audio="'+ait+'" title="点击听意大利语">'+esc(s[0])+'</div>'+
+    '<div class="rom">'+esc(s[1]||'')+'</div>'+
+    '<div class="cn" data-spk="'+esc(s[2])+'" data-lang="zh-CN" data-audio="'+azh+'" title="点击听中文">'+esc(s[2]||'')+'</div>'+
+    '<div class="py">'+esc(s[4]||'')+'</div>'+
   '</div>';
 }
 function sentList(I){
@@ -264,16 +258,12 @@ function dialogBlock(I){
       const id=I.id+'-d-'+di+'-'+li; const on=isDone(id);
       const ait='audio/'+I.id+'/d_'+di+'_'+li+'_it.mp3', azh='audio/'+I.id+'/d_'+di+'_'+li+'_zh.mp3';
       h+='<div class="row">'+
-        '<div class="main">'+
-          '<span class="role">'+esc(ln[0])+'</span>'+
-          '<div class="it">'+esc(ln[1])+'</div>'+
-          '<div class="rom">'+esc(ln[2]||'')+'</div>'+
-          '<div class="cn">'+esc(ln[3]||'')+'</div>'+
-          '<div class="py">'+esc(ln[4]||'')+'</div>'+
-        '</div>'+
-        '<button class="au" data-spk="'+esc(ln[1])+'" data-lang="it-IT" data-audio="'+ait+'" title="听意大利语">🔊</button>'+
-        '<button class="au cn" data-spk="'+esc(ln[3])+'" data-lang="zh-CN" data-audio="'+azh+'" title="听中文">🀄</button>'+
-        '<button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button>'+
+        '<div class="rowtop"><button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button></div>'+
+        '<span class="role">'+esc(ln[0])+'</span>'+
+        '<div class="it" data-spk="'+esc(ln[1])+'" data-lang="it-IT" data-audio="'+ait+'" title="点击听意大利语">'+esc(ln[1])+'</div>'+
+        '<div class="rom">'+esc(ln[2]||'')+'</div>'+
+        '<div class="cn" data-spk="'+esc(ln[3])+'" data-lang="zh-CN" data-audio="'+azh+'" title="点击听中文">'+esc(ln[3]||'')+'</div>'+
+        '<div class="py">'+esc(ln[4]||'')+'</div>'+
       '</div>';
     });
   });
@@ -302,14 +292,14 @@ function renderHome(){
   app.innerHTML=
     '<div class="home-intro">'+
       '<b>意语职场通</b> 专为在意大利工作的华人打造，按行业分类，覆盖在意华人主要工作场景。'+
-      '每一条都提供 <b>意大利语 + 中文谐音 + 中文意思（附拼音）</b>，点 🔊 听意语真人发音、点 🀄 听中文真人发音。点「标记掌握」记录学习进度，进度自动保存在本机。'+
+      '每一条都提供 <b>意大利语 + 中文谐音 + 中文意思（附拼音）</b>。<b>点击意大利语文本</b>听意语真人发音，<b>点击中文文本</b>（不含谐音）听中文真人发音；点「标记掌握」记录学习进度，进度自动保存在本机。'+
     '</div>'+
     '<div class="section-title">📚 选择行业开始学习</div>'+
     '<div class="grid">'+cards+'</div>'+
     '<div class="section-title">📊 我的学习总览</div>'+
     '<div class="dash" id="dash"></div>'+
     '<div class="note">'+
-      '提示：①「中文谐音」为近似发音，仅供辅助，准确发音请以 🔊 / 🀄 真人语音为准；②真人语音为站点自带 mp3，'+
+      '提示：①「中文谐音」为近似发音，仅供辅助；准确发音请<b>点击意大利语文本</b>听意语真人语音、<b>点击中文文本</b>听中文真人语音；②真人语音为站点自带 mp3，'+
       '首次加载需联网下载，之后浏览器会缓存；离线或个别音频缺失时自动回退浏览器内置语音；③进度保存在当前浏览器本地，换设备不同步。'+
     '</div>'+
     '<div style="text-align:center;margin-top:10px;">'+
@@ -406,15 +396,14 @@ function renderSearch(){
 function dlgRow(I,di,li,ln){
   const id=I.id+'-d-'+di+'-'+li; const on=isDone(id);
   const ait='audio/'+I.id+'/d_'+di+'_'+li+'_it.mp3', azh='audio/'+I.id+'/d_'+di+'_'+li+'_zh.mp3';
-  return '<div class="row"><div class="main">'+
+  return '<div class="row">'+
+    '<div class="rowtop"><button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button></div>'+
     '<span class="role">'+esc(ln[0])+'</span>'+
-    '<div class="it">'+esc(ln[1])+'</div>'+
+    '<div class="it" data-spk="'+esc(ln[1])+'" data-lang="it-IT" data-audio="'+ait+'" title="点击听意大利语">'+esc(ln[1])+'</div>'+
     '<div class="rom">'+esc(ln[2]||'')+'</div>'+
-    '<div class="cn">'+esc(ln[3]||'')+'</div>'+
-    '<div class="py">'+esc(ln[4]||'')+'</div></div>'+
-    '<button class="au" data-spk="'+esc(ln[1])+'" data-lang="it-IT" data-audio="'+ait+'">🔊</button>'+
-    '<button class="au cn" data-spk="'+esc(ln[3])+'" data-lang="zh-CN" data-audio="'+azh+'">🀄</button>'+
-    '<button class="mark '+(on?'on':'')+'" data-id="'+id+'">'+(on?'✓ 已掌握':'标记掌握')+'</button></div>';
+    '<div class="cn" data-spk="'+esc(ln[3])+'" data-lang="zh-CN" data-audio="'+azh+'" title="点击听中文">'+esc(ln[3]||'')+'</div>'+
+    '<div class="py">'+esc(ln[4]||'')+'</div>'+
+  '</div>';
 }
 
 function resetProg(){

@@ -107,6 +107,11 @@
 
   footer{text-align:center;color:var(--sub);font-size:12px;margin-top:26px;line-height:1.8;}
   .reset{background:none;border:1px solid var(--line);color:var(--sub);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;}
+  .toolbar{display:flex;gap:10px;align-items:center;margin:12px 0 0;flex-wrap:wrap;}
+  .playall{border:0;background:var(--accent);color:#fff;border-radius:10px;padding:9px 16px;font-size:14px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:var(--shadow);}
+  .playall:active{transform:translateY(1px);}
+  .playall.on{background:#dc2626;}
+  .toolbar .tinfo{font-size:12px;color:var(--sub);}
   @media(max-width:560px){
     .brand h1{font-size:17px;}
     .row .main{min-width:140px;}
@@ -183,13 +188,16 @@ function fallbackSpeak(text,lang){
   speechSynthesis.speak(u);
 }
 let curAudio=null;   // 复用同一个 Audio 元素，避免重复创建与叠音
+let seq=null;        // 全局连播队列 {items:[{text,lang,audio}], i}
 function stopAllAudio(){
   // ① 停止正在播放的真人 mp3
   if(curAudio){
-    try{ curAudio.pause(); curAudio.currentTime=0; }catch(e){}
+    try{ curAudio.onended=null; curAudio.pause(); curAudio.currentTime=0; }catch(e){}
   }
   // ② 停止浏览器 TTS 回退（与 mp3 互斥，确保新音频播放时旧音频一定静音）
   try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+  // ③ 若在全局连播中，一并中止
+  seq=null;
 }
 function speak(text,lang,audioPath){
   stopAllAudio();   // 新音频播放前，先打断在播音频（mp3 与 TTS 任一通道）
@@ -204,6 +212,52 @@ function speak(text,lang,audioPath){
     return;
   }
   fallbackSpeak(text,lang);
+}
+
+/* ============ 全局连播：意语播完播中文 ============ */
+function stopSeq(){
+  if(curAudio){ try{ curAudio.onended=null; curAudio.pause(); curAudio.currentTime=0; }catch(e){} }
+  try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+  seq=null;
+}
+function playSeqNext(){
+  if(!seq || seq.i>=seq.items.length){ stopSeq(); updatePlayBtn(false); return; }
+  const it=seq.items[seq.i++];
+  if(curAudio) curAudio.onended=null;
+  if(!curAudio) curAudio=new Audio();
+  if(it.audio){
+    curAudio.src=it.audio;
+    curAudio.onended=function(){ curAudio.onended=null; playSeqNext(); };
+    curAudio.onerror=function(){ curAudio.onerror=null; fallbackSpeak(it.text,it.lang); setTimeout(playSeqNext,700); };
+    const p=curAudio.play();
+    if(p&&p.catch) p.catch(function(e){ if(e&&e.name==='AbortError') return; fallbackSpeak(it.text,it.lang); setTimeout(playSeqNext,700); });
+  }else{
+    fallbackSpeak(it.text,it.lang);
+    setTimeout(playSeqNext,1000);
+  }
+}
+function updatePlayBtn(on){
+  const b=document.getElementById('playAllBtn');
+  if(b){ b.textContent=on?'⏹ 停止播放':'🔊 全局播放'; b.classList.toggle('on',on); }
+}
+function togglePlayAll(){
+  if(seq){ stopSeq(); updatePlayBtn(false); return; }
+  const I=DATA[view.ind]; if(!I) return;
+  const id=I.id; const items=[];
+  function pair(ait,azh,it,zh){ if(ait) items.push({text:it,lang:'it-IT',audio:ait}); if(azh) items.push({text:zh,lang:'zh-CN',audio:azh}); }
+  if(view.tab==='vocab'){
+    I.vocab.forEach(function(v,i){ pair('audio/'+id+'/v_'+i+'_it.mp3','audio/'+id+'/v_'+i+'_zh.mp3', v[0], v[2]); });
+  }else if(view.tab==='sent'){
+    I.sentences.forEach(function(s,i){ pair('audio/'+id+'/s_'+i+'_it.mp3','audio/'+id+'/s_'+i+'_zh.mp3', s[0], s[2]); });
+  }else if(view.tab==='dialog'){
+    I.dialogues.forEach(function(d,di){ d.lines.forEach(function(ln,li){ pair('audio/'+id+'/d_'+di+'_'+li+'_it.mp3','audio/'+id+'/d_'+di+'_'+li+'_zh.mp3', ln[1], ln[3]); }); });
+  }else{ // culture：仅中文文本，用 TTS 朗读
+    I.culture.forEach(function(c){ const t=Array.isArray(c)?c[0]:c; items.push({text:t,lang:'zh-CN',audio:null}); });
+  }
+  if(!items.length) return;
+  updatePlayBtn(true);
+  seq={items:items, i:0};
+  playSeqNext();
 }
 
 /* ============ 进度存储 ============ */
@@ -366,6 +420,7 @@ function openInd(id){
   loadInd(id, function(){ render(); });
 }
 function renderInd(){
+  stopSeq();
   const I=DATA[view.ind];
   if(!I){ app.innerHTML='<div class="empty">⚠️ 数据未加载，请返回重试。</div>'; return; }
   const m=metaOf(view.ind); const d=indDone(m),t=indTotal(m);
@@ -385,6 +440,8 @@ function renderInd(){
     '<div class="tabs">'+
       tabs.map(function(x){ return '<button class="tab '+(view.tab===x[0]?'on':'')+'" onclick="setTab(\''+x[0]+'\')">'+x[1]+'</button>'; }).join('')+
     '</div>'+
+    '<div class="toolbar"><button class="playall" id="playAllBtn" onclick="togglePlayAll()">🔊 全局播放</button>'+
+      '<span class="tinfo">按「意语→中文」顺序连播本板块全部条目</span></div>'+
     '<div class="block">'+(body||'<div class="empty">暂无内容</div>')+'</div>';
 }
 function setTab(t){ view.tab=t; renderInd(); }
@@ -472,7 +529,7 @@ document.addEventListener('click',function(e){
   }
 });
 
-function render(){ renderHeader(); if(view.type==='home')renderHome(); else if(view.type==='ind')renderInd(); else renderSearch(); }
+function render(){ stopSeq(); renderHeader(); if(view.type==='home')renderHome(); else if(view.type==='ind')renderInd(); else renderSearch(); }
 function boot(){
   applyFs();   // 应用上次保存的字号
   META = window.META || META;   // 重新读取（defer 的 meta.js 此时已执行）
